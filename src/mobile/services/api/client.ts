@@ -4,7 +4,17 @@
 import { AuthStorage } from '../storage.ts';
 import type { ApiResponse } from '../../../types/quiz.ts';
 
-const BASE_URL = (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) || '/api/v1';
+const getBaseUrl = (): string => {
+  if (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return `${window.location.origin}/api/v1`;
+  }
+  return 'https://ais-dev-4bjzqvwall6zdaojnl3ork-365858207471.asia-east1.run.app/api/v1';
+};
+
+const BASE_URL = getBaseUrl();
 
 interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;

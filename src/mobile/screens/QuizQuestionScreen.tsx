@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import {
   ArrowLeft,
   LayoutGrid,
@@ -7,8 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Send,
-  HelpCircle,
-} from 'lucide-react';
+} from 'lucide-react-native';
 import { useQuizSession } from '../store/quizStore.ts';
 import { useNetwork } from '../store/networkStore.ts';
 import { api } from '../services/api/client.ts';
@@ -45,7 +45,6 @@ export const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
   const answeredCount = Object.keys(selectedAnswers).length;
   const unansweredCount = totalQuestions - answeredCount;
 
-  // Indices of questions that have an answer
   const answeredIndices = questions
     .map((q, idx) => (selectedAnswers[q.id] ? idx : -1))
     .filter((idx) => idx !== -1);
@@ -79,7 +78,6 @@ export const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
         }
       }
 
-      // Offline mode submission: save into local SQLite queue
       const now = new Date();
       const startedTime = startedAt ? new Date(startedAt).getTime() : Date.now();
       const timeTaken = Math.max(1, Math.round((now.getTime() - startedTime) / 1000));
@@ -96,9 +94,7 @@ export const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
       });
 
       onCompleteQuiz(attemptId);
-    } catch (e) {
-      console.error('Failed to submit attempt:', e);
-      // Fallback: save to offline SQLite if network dropped during submission!
+    } catch {
       const now = new Date();
       sqliteDb.saveOfflineAttempt({
         localId: attemptId,
@@ -116,79 +112,76 @@ export const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
     }
   };
 
-  const handleTimerExpired = () => {
-    // Automatically submit attempt on expiry
-    handleSubmitAttempt();
-  };
-
   if (!currentQ) {
     return (
-      <div className="text-center py-20 text-slate-500">
-        <p>No questions loaded for this quiz session.</p>
-        <Button onClick={onExit} className="mt-4">
+      <View className="flex-1 items-center justify-center p-6">
+        <Text className="text-slate-500 text-center mb-4">
+          No questions loaded for this quiz session.
+        </Text>
+        <Button onPress={onExit}>
           Return to Dashboard
         </Button>
-      </div>
+      </View>
     );
   }
 
   return (
-    <div className="flex flex-col h-full min-h-[580px] justify-between pb-4">
+    <SafeAreaView className="flex-1 justify-between pb-4">
       {/* Top Header */}
-      <div className="space-y-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setShowExitModal(true)}
-            className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"
-            title="Exit quiz"
+      <View className="space-y-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <View className="flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={() => setShowExitModal(true)}
+            className="p-2 rounded-full bg-slate-100 dark:bg-slate-800"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+            <ArrowLeft size={18} color="#64748b" />
+          </TouchableOpacity>
 
           {/* Question Count & Timer */}
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+          <View className="flex-row items-center space-x-3">
+            <Text className="text-xs font-black text-slate-800 dark:text-slate-200 mr-2">
               {currentQuestionIndex + 1} / {totalQuestions}
-            </span>
+            </Text>
 
             {expiresAt && startedAt && (
               <QuizTimer
                 startedAt={startedAt}
                 expiresAt={expiresAt}
-                onTimeExpired={handleTimerExpired}
+                onTimeExpired={handleSubmitAttempt}
               />
             )}
-          </div>
+          </View>
 
           {/* Question Navigator Drawer trigger */}
-          <button
-            onClick={() => setIsNavigatorOpen(true)}
-            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-bold"
-            title="Open Question Navigator"
+          <TouchableOpacity
+            onPress={() => setIsNavigatorOpen(true)}
+            className="p-2 rounded-2xl bg-slate-100 dark:bg-slate-800"
           >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-        </div>
+            <LayoutGrid size={18} color="#059669" />
+          </TouchableOpacity>
+        </View>
 
         {/* Progress Bar */}
         <ProgressBar current={currentQuestionIndex + 1} total={totalQuestions} />
-      </div>
+      </View>
 
       {/* Question & Answer Card */}
-      <div className="flex-1 py-4 space-y-5 overflow-y-auto">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-            {currentQ.difficulty || 'MEDIUM'} DIFFICULTY
-          </span>
+      <ScrollView className="flex-1 py-4 space-y-4" showsVerticalScrollIndicator={false}>
+        <View className="flex-row items-center justify-between">
+          <View className="bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+            <Text className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
+              {currentQ.difficulty || 'MEDIUM'} DIFFICULTY
+            </Text>
+          </View>
           <BookmarkButton questionId={currentQ.id} />
-        </div>
+        </View>
 
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-relaxed">
+        <Text className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-relaxed">
           {currentQ.questionText}
-        </h2>
+        </Text>
 
         {/* Options */}
-        <div className="space-y-2.5 pt-2">
+        <View className="space-y-2.5 pt-2">
           {currentQ.options.map((opt, idx) => (
             <OptionButton
               key={opt.id}
@@ -198,38 +191,51 @@ export const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
               onSelect={() => handleSelectOption(opt.id)}
             />
           ))}
-        </div>
-      </div>
+        </View>
+      </ScrollView>
 
       {/* Bottom Navigation Buttons */}
-      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
-        <Button
-          onClick={prevQuestion}
-          disabled={currentQuestionIndex === 0}
-          variant="outline"
-          size="md"
-          className="flex-1"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span>Previous</span>
-        </Button>
-
-        {isLastQuestion ? (
+      <View className="pt-3 border-t border-slate-100 dark:border-slate-800 flex-row items-center justify-between space-x-3">
+        <View className="flex-1 mr-2">
           <Button
-            onClick={() => setShowSubmitModal(true)}
+            onPress={prevQuestion}
+            disabled={currentQuestionIndex === 0}
+            variant="outline"
             size="md"
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+            fullWidth
           >
-            <Send className="w-4 h-4" />
-            <span>Submit Quiz</span>
+            <View className="flex-row items-center">
+              <ChevronLeft size={16} color="#64748b" />
+              <Text className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">
+                Previous
+              </Text>
+            </View>
           </Button>
-        ) : (
-          <Button onClick={nextQuestion} size="md" className="flex-1">
-            <span>Next</span>
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
+        </View>
+
+        <View className="flex-1 ml-2">
+          {isLastQuestion ? (
+            <Button
+              onPress={() => setShowSubmitModal(true)}
+              size="md"
+              fullWidth
+              className="bg-emerald-600"
+            >
+              <View className="flex-row items-center">
+                <Send size={16} color="#ffffff" />
+                <Text className="text-xs font-bold text-white ml-1.5">Submit</Text>
+              </View>
+            </Button>
+          ) : (
+            <Button onPress={nextQuestion} size="md" fullWidth>
+              <View className="flex-row items-center">
+                <Text className="text-xs font-bold text-white mr-1">Next</Text>
+                <ChevronRight size={16} color="#ffffff" />
+              </View>
+            </Button>
+          )}
+        </View>
+      </View>
 
       {/* Question Navigator Modal */}
       <QuestionNavigator
@@ -243,95 +249,103 @@ export const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
 
       {/* Submit Confirmation Modal */}
       {showSubmitModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-150">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">
+        <View className="absolute inset-0 z-50 bg-black/60 justify-center items-center p-4">
+          <View className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <View className="items-center space-y-2">
+              <View className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 items-center justify-center mb-1">
+                <CheckCircle2 size={24} color="#059669" />
+              </View>
+              <Text className="font-black text-slate-900 dark:text-white text-lg">
                 Submit Quiz?
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              </Text>
+              <Text className="text-xs text-slate-500 text-center">
                 Review your response status before final evaluation:
-              </p>
-            </div>
+              </Text>
+            </View>
 
-            <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-3.5 space-y-2 text-xs">
-              <div className="flex justify-between font-semibold">
-                <span className="text-slate-500">Total Questions</span>
-                <span className="text-slate-900 dark:text-white font-bold">{totalQuestions}</span>
-              </div>
-              <div className="flex justify-between font-semibold text-emerald-600 dark:text-emerald-400">
-                <span>Answered</span>
-                <span className="font-bold">{answeredCount}</span>
-              </div>
-              <div className="flex justify-between font-semibold text-amber-600 dark:text-amber-400">
-                <span>Unanswered</span>
-                <span className="font-bold">{unansweredCount}</span>
-              </div>
-            </div>
+            <View className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-3.5 space-y-2">
+              <View className="flex-row justify-between">
+                <Text className="text-xs text-slate-500">Total Questions</Text>
+                <Text className="text-xs text-slate-900 dark:text-white font-bold">{totalQuestions}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Answered</Text>
+                <Text className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">{answeredCount}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-xs text-amber-600 dark:text-amber-400 font-bold">Unanswered</Text>
+                <Text className="text-xs text-amber-600 dark:text-amber-400 font-bold">{unansweredCount}</Text>
+              </View>
+            </View>
 
-            <div className="flex items-center gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowSubmitModal(false)}
-                className="flex-1"
-              >
-                Continue Quiz
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowSubmitModal(false);
-                  handleSubmitAttempt();
-                }}
-                className="flex-1"
-              >
-                Submit Now
-              </Button>
-            </div>
-          </div>
-        </div>
+            <View className="flex-row items-center space-x-2 pt-2">
+              <View className="flex-1 mr-1">
+                <Button
+                  variant="outline"
+                  onPress={() => setShowSubmitModal(false)}
+                  fullWidth
+                >
+                  Continue
+                </Button>
+              </View>
+              <View className="flex-1 ml-1">
+                <Button
+                  onPress={() => {
+                    setShowSubmitModal(false);
+                    handleSubmitAttempt();
+                  }}
+                  fullWidth
+                >
+                  Submit Now
+                </Button>
+              </View>
+            </View>
+          </View>
+        </View>
       )}
 
       {/* Exit Warning Modal */}
       {showExitModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center mx-auto">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">
+        <View className="absolute inset-0 z-50 bg-black/60 justify-center items-center p-4">
+          <View className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <View className="items-center space-y-2">
+              <View className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 items-center justify-center mb-1">
+                <AlertCircle size={24} color="#e11d48" />
+              </View>
+              <Text className="font-black text-slate-900 dark:text-white text-lg">
                 Leave Quiz?
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              </Text>
+              <Text className="text-xs text-slate-500 text-center">
                 Your current timer and answers will remain stored on your device, but time will continue to tick.
-              </p>
-            </div>
+              </Text>
+            </View>
 
-            <div className="flex items-center gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowExitModal(false)}
-                className="flex-1"
-              >
-                Stay
-              </Button>
-              <Button
-                variant="danger"
-                onClick={() => {
-                  setShowExitModal(false);
-                  onExit();
-                }}
-                className="flex-1"
-              >
-                Exit Quiz
-              </Button>
-            </div>
-          </div>
-        </div>
+            <View className="flex-row items-center space-x-2 pt-2">
+              <View className="flex-1 mr-1">
+                <Button
+                  variant="outline"
+                  onPress={() => setShowExitModal(false)}
+                  fullWidth
+                >
+                  Stay
+                </Button>
+              </View>
+              <View className="flex-1 ml-1">
+                <Button
+                  variant="danger"
+                  onPress={() => {
+                    setShowExitModal(false);
+                    onExit();
+                  }}
+                  fullWidth
+                >
+                  Exit Quiz
+                </Button>
+              </View>
+            </View>
+          </View>
+        </View>
       )}
-    </div>
+    </SafeAreaView>
   );
 };

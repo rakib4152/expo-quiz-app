@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text } from 'react-native';
 
 interface ProgressBarProps {
   current: number;
@@ -18,19 +19,23 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   const percentage = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
 
   return (
-    <div className={`w-full ${className}`}>
+    <View className={`w-full ${className}`}>
       {showLabel && (
-        <div className="flex justify-between items-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
-          <span>{current} of {total}</span>
-          <span>{percentage}%</span>
-        </div>
+        <View className="flex-row justify-between items-center mb-1">
+          <Text className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            {current} of {total}
+          </Text>
+          <Text className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            {percentage}%
+          </Text>
+        </View>
       )}
-      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
-        <div
-          className={`h-full ${color} transition-all duration-300 ease-out rounded-full`}
+      <View className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+        <View
+          className={`h-full ${color} rounded-full`}
           style={{ width: `${percentage}%` }}
         />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };

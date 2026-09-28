@@ -1,5 +1,6 @@
 import React from 'react';
-import { Home, BookOpen, HelpCircle, Bookmark, User } from 'lucide-react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Home, BookOpen, HelpCircle, Bookmark, User } from 'lucide-react-native';
 
 export type TabKey = 'home' | 'subjects' | 'quizzes' | 'bookmarks' | 'profile';
 
@@ -23,35 +24,43 @@ export const BottomTabs: React.FC<BottomTabsProps> = ({
   ];
 
   return (
-    <nav aria-label="Bottom Navigation" className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 py-1.5 px-3 z-40">
-      <div className="flex items-center justify-around">
+    <View className="bg-white/95 dark:bg-slate-900/95 border-t border-slate-200 dark:border-slate-800 py-2 px-3">
+      <View className="flex-row items-center justify-around">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
 
           return (
-            <button
+            <TouchableOpacity
               key={tab.key}
-              onClick={() => onSelectTab(tab.key)}
-              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all relative cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'text-emerald-600 dark:text-emerald-400 font-bold'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium'
-              }`}
+              onPress={() => onSelectTab(tab.key)}
+              activeOpacity={0.7}
+              className="items-center justify-center py-1 px-3"
             >
-              <div className="relative">
-                <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
+              <View className="relative">
+                <Icon
+                  size={20}
+                  color={isActive ? '#059669' : '#94a3b8'}
+                />
                 {tab.badge && (
-                  <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
-                    {tab.badge}
-                  </span>
+                  <View className="absolute -top-1 -right-2 bg-amber-500 w-4 h-4 rounded-full items-center justify-center">
+                    <Text className="text-white text-[9px] font-extrabold">{tab.badge}</Text>
+                  </View>
                 )}
-              </div>
-              <span className="text-[10px] mt-1 tracking-tight">{tab.label}</span>
-            </button>
+              </View>
+              <Text
+                className={`text-[10px] mt-1 font-semibold ${
+                  isActive
+                    ? 'text-emerald-600 dark:text-emerald-400 font-extrabold'
+                    : 'text-slate-400'
+                }`}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
           );
         })}
-      </div>
-    </nav>
+      </View>
+    </View>
   );
 };

@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView } from 'react-native';
 import {
   Trophy,
   CheckCircle2,
   XCircle,
   HelpCircle,
   Clock,
-  ArrowRight,
-  RotateCcw,
   Sparkles,
   BookOpen,
   Home,
-} from 'lucide-react';
-import confetti from 'canvas-confetti';
+} from 'lucide-react-native';
 import { api } from '../services/api/client.ts';
 import { Button } from '../components/ui/Buttons.tsx';
 import type { QuizAttemptResult } from '../../types/quiz.ts';
@@ -27,7 +25,6 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   attemptId,
   onReviewAnswers,
   onBackToHome,
-  onRetryQuiz,
 }) => {
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,13 +40,17 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       if (res.data) {
         setResult(res.data);
         if (res.data.percentage >= 60) {
-          try {
-            confetti({
-              particleCount: 80,
-              spread: 60,
-              origin: { y: 0.6 },
-            });
-          } catch {}
+          if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+            import('canvas-confetti')
+              .then((mod) => {
+                mod.default({
+                  particleCount: 80,
+                  spread: 60,
+                  origin: { y: 0.6 },
+                });
+              })
+              .catch(() => {});
+          }
         }
       }
     } catch (e) {
@@ -61,10 +62,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
   if (loading || !result) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-3">
-        <Sparkles className="w-8 h-8 animate-spin text-emerald-500" />
-        <p className="text-xs font-semibold">Evaluating your answers securely...</p>
-      </div>
+      <View className="flex-1 items-center justify-center py-20 space-y-3">
+        <Sparkles size={32} color="#059669" />
+        <Text className="text-xs font-bold text-slate-400">Evaluating your answers securely...</Text>
+      </View>
     );
   }
 
@@ -73,98 +74,102 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   const isPass = result.percentage >= 60;
 
   return (
-    <div className="space-y-6 pb-20 text-center animate-in fade-in duration-300">
+    <ScrollView className="flex-1 space-y-6 pb-12" showsVerticalScrollIndicator={false}>
       {/* Header Banner */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border-4 border-emerald-500/20 shadow-inner">
-          <Trophy className={`w-10 h-10 ${isPass ? 'text-amber-500 fill-amber-500' : 'text-slate-400'}`} />
-        </div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+      <View className="items-center space-y-2">
+        <View className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border-4 border-emerald-500/20 items-center justify-center mb-1">
+          <Trophy size={40} color={isPass ? '#f59e0b' : '#94a3b8'} />
+        </View>
+        <Text className="text-2xl font-black text-slate-900 dark:text-white">
           {isPass ? '🎉 Quiz Completed!' : 'Keep Practicing!'}
-        </h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+        </Text>
+        <Text className="text-xs text-slate-500 text-center max-w-xs">
           {result.quizTitle}
-        </p>
-      </div>
+        </Text>
+      </View>
 
-      {/* Big Score Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs max-w-sm mx-auto space-y-4">
-        <div>
-          <div className="text-5xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
+      {/* Score Card */}
+      <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm max-w-sm mx-auto w-full items-center space-y-4">
+        <View className="items-center">
+          <Text className="text-5xl font-black text-emerald-600 dark:text-emerald-400">
             {result.percentage}%
-          </div>
-          <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
+          </Text>
+          <Text className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
             Total Score: {result.score} pts
-          </p>
-        </div>
+          </Text>
+        </View>
 
         {/* 4 Metrics Grid */}
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-left">
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex items-center gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            <div>
-              <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+        <View className="w-full flex-row flex-wrap justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+          <View className="w-[48%] bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex-row items-center mb-2.5">
+            <CheckCircle2 size={20} color="#10b981" />
+            <View className="ml-2.5">
+              <Text className="font-extrabold text-slate-900 dark:text-white text-sm">
                 {result.correctAnswers}
-              </div>
-              <div className="text-[10px] text-slate-400">Correct</div>
-            </div>
-          </div>
+              </Text>
+              <Text className="text-[10px] text-slate-400">Correct</Text>
+            </View>
+          </View>
 
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex items-center gap-2.5">
-            <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
-            <div>
-              <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+          <View className="w-[48%] bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex-row items-center mb-2.5">
+            <XCircle size={20} color="#f43f5e" />
+            <View className="ml-2.5">
+              <Text className="font-extrabold text-slate-900 dark:text-white text-sm">
                 {result.incorrectAnswers}
-              </div>
-              <div className="text-[10px] text-slate-400">Incorrect</div>
-            </div>
-          </div>
+              </Text>
+              <Text className="text-[10px] text-slate-400">Incorrect</Text>
+            </View>
+          </View>
 
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex items-center gap-2.5">
-            <HelpCircle className="w-5 h-5 text-amber-500 shrink-0" />
-            <div>
-              <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+          <View className="w-[48%] bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex-row items-center">
+            <HelpCircle size={20} color="#f59e0b" />
+            <View className="ml-2.5">
+              <Text className="font-extrabold text-slate-900 dark:text-white text-sm">
                 {result.unansweredQuestions}
-              </div>
-              <div className="text-[10px] text-slate-400">Unanswered</div>
-            </div>
-          </div>
+              </Text>
+              <Text className="text-[10px] text-slate-400">Unanswered</Text>
+            </View>
+          </View>
 
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex items-center gap-2.5">
-            <Clock className="w-5 h-5 text-blue-500 shrink-0" />
-            <div>
-              <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+          <View className="w-[48%] bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl flex-row items-center">
+            <Clock size={20} color="#3b82f6" />
+            <View className="ml-2.5">
+              <Text className="font-extrabold text-slate-900 dark:text-white text-sm">
                 {minutes}m {seconds}s
-              </div>
-              <div className="text-[10px] text-slate-400">Time Taken</div>
-            </div>
-          </div>
-        </div>
-      </div>
+              </Text>
+              <Text className="text-[10px] text-slate-400">Time Taken</Text>
+            </View>
+          </View>
+        </View>
+      </View>
 
       {/* Action Buttons */}
-      <div className="space-y-2.5 max-w-sm mx-auto">
+      <View className="space-y-3 max-w-sm mx-auto w-full">
         <Button
-          onClick={() => onReviewAnswers(attemptId)}
+          onPress={() => onReviewAnswers(attemptId)}
           fullWidth
           size="lg"
-          className="text-sm shadow-md shadow-emerald-500/20"
         >
-          <BookOpen className="w-4 h-4" />
-          <span>Review Answers & Explanations</span>
+          <View className="flex-row items-center">
+            <BookOpen size={18} color="#ffffff" />
+            <Text className="text-white font-bold text-sm ml-2">Review Answers & Explanations</Text>
+          </View>
         </Button>
 
         <Button
-          onClick={onBackToHome}
+          onPress={onBackToHome}
           variant="outline"
           fullWidth
           size="md"
-          className="text-xs"
         >
-          <Home className="w-4 h-4" />
-          <span>Back to Home Dashboard</span>
+          <View className="flex-row items-center">
+            <Home size={16} color="#64748b" />
+            <Text className="text-slate-700 dark:text-slate-300 font-bold text-xs ml-1.5">
+              Back to Home Dashboard
+            </Text>
+          </View>
         </Button>
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 };

@@ -9,6 +9,8 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        'react-native': path.resolve(__dirname, 'src/react-native-shim.tsx'),
+        'lucide-react-native': path.resolve(__dirname, 'src/lucide-react-native-shim.tsx'),
       },
     },
     server: {

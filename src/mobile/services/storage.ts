@@ -1,5 +1,7 @@
 // Mobile storage abstraction mirroring Expo SecureStore and AsyncStorage
-// Provides encrypted token storage semantics and local key-value persistence.
+// Compatible with both Expo Go runtime and web environments without throwing ReferenceErrors.
+
+const memoryStore = new Map<string, string>();
 
 const TOKEN_KEY = 'quizpulse_secure_auth_token';
 const REFRESH_TOKEN_KEY = 'quizpulse_secure_refresh_token';
@@ -8,25 +10,34 @@ const USER_KEY = 'quizpulse_cached_user';
 export const SecureStore = {
   async getItemAsync(key: string): Promise<string | null> {
     try {
-      return localStorage.getItem(key);
+      if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+        return window.localStorage.getItem(key);
+      }
+      return memoryStore.get(key) || null;
     } catch {
-      return null;
+      return memoryStore.get(key) || null;
     }
   },
 
   async setItemAsync(key: string, value: string): Promise<void> {
     try {
-      localStorage.setItem(key, value);
-    } catch (e) {
-      console.error('Failed to set secure store key:', key, e);
+      memoryStore.set(key, value);
+      if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+        window.localStorage.setItem(key, value);
+      }
+    } catch {
+      memoryStore.set(key, value);
     }
   },
 
   async deleteItemAsync(key: string): Promise<void> {
     try {
-      localStorage.removeItem(key);
-    } catch (e) {
-      console.error('Failed to delete secure store key:', key, e);
+      memoryStore.delete(key);
+      if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+        window.localStorage.removeItem(key);
+      }
+    } catch {
+      memoryStore.delete(key);
     }
   },
 };

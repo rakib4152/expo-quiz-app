@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, SafeAreaView } from 'react-native';
 import { useAuth } from './store/authStore.ts';
 import { useQuizSession } from './store/quizStore.ts';
 import { BottomTabs, TabKey } from './components/ui/BottomTabs.tsx';
@@ -13,7 +14,7 @@ import { ResultScreen } from './screens/ResultScreen.tsx';
 import { QuestionReviewScreen } from './screens/QuestionReviewScreen.tsx';
 import { LeaderboardScreen } from './screens/LeaderboardScreen.tsx';
 import { AuthScreen } from './screens/AuthScreen.tsx';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react-native';
 
 export const MobileApp: React.FC = () => {
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
@@ -34,10 +35,10 @@ export const MobileApp: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] text-slate-400 space-y-2">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-        <span className="text-xs font-semibold">Loading QuizPulse...</span>
-      </div>
+      <View className="flex-1 items-center justify-center min-h-[500px] space-y-2">
+        <Loader2 size={32} color="#059669" />
+        <Text className="text-xs font-bold text-slate-400 mt-2">Loading QuizPulse...</Text>
+      </View>
     );
   }
 
@@ -117,39 +118,41 @@ export const MobileApp: React.FC = () => {
 
   // 6. Main Tab Navigation Stack
   return (
-    <div className="relative min-h-[580px]">
-      {activeTab === 'home' && (
-        <HomeScreen
-          onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)}
-          onNavigateToSubject={(subId) => {
-            setActiveSubjectId(subId);
-            setActiveTab('subjects');
-          }}
-          onNavigateToTab={(tab) => setActiveTab(tab as TabKey)}
-          onNavigateToLeaderboard={() => setShowLeaderboard(true)}
-        />
-      )}
+    <SafeAreaView className="flex-1 justify-between">
+      <View className="flex-1">
+        {activeTab === 'home' && (
+          <HomeScreen
+            onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)}
+            onNavigateToSubject={(subId) => {
+              setActiveSubjectId(subId);
+              setActiveTab('subjects');
+            }}
+            onNavigateToTab={(tab) => setActiveTab(tab as TabKey)}
+            onNavigateToLeaderboard={() => setShowLeaderboard(true)}
+          />
+        )}
 
-      {activeTab === 'subjects' && (
-        <SubjectsScreen
-          onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)}
-          selectedSubjectId={activeSubjectId}
-          onClearSelectedSubject={() => setActiveSubjectId(null)}
-        />
-      )}
+        {activeTab === 'subjects' && (
+          <SubjectsScreen
+            onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)}
+            selectedSubjectId={activeSubjectId}
+            onClearSelectedSubject={() => setActiveSubjectId(null)}
+          />
+        )}
 
-      {activeTab === 'quizzes' && (
-        <QuizzesScreen onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)} />
-      )}
+        {activeTab === 'quizzes' && (
+          <QuizzesScreen onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)} />
+        )}
 
-      {activeTab === 'bookmarks' && <BookmarksScreen />}
+        {activeTab === 'bookmarks' && <BookmarksScreen />}
 
-      {activeTab === 'profile' && (
-        <ProfileScreen
-          onNavigateToReview={(attemptId) => setReviewAttemptId(attemptId)}
-          onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)}
-        />
-      )}
+        {activeTab === 'profile' && (
+          <ProfileScreen
+            onNavigateToReview={(attemptId) => setReviewAttemptId(attemptId)}
+            onNavigateToQuiz={(quizId) => setActiveQuizId(quizId)}
+          />
+        )}
+      </View>
 
       {/* Persistent Bottom Tab Bar */}
       <BottomTabs
@@ -159,6 +162,6 @@ export const MobileApp: React.FC = () => {
           setActiveTab(tab);
         }}
       />
-    </div>
+    </SafeAreaView>
   );
 };

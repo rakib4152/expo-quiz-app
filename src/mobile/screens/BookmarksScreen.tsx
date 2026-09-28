@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Bookmark, Trash2, CheckCircle2, BookOpen, AlertCircle } from 'lucide-react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Bookmark, Trash2, CheckCircle2 } from 'lucide-react-native';
 import { api } from '../services/api/client.ts';
-import type { BookmarkItem } from '../../types/quiz.ts';
+import type { BookmarkItem, Option } from '../../types/quiz.ts';
 
 export const BookmarksScreen: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
@@ -35,101 +36,115 @@ export const BookmarksScreen: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 pb-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+    <ScrollView className="flex-1 space-y-5 pb-12" showsVerticalScrollIndicator={false}>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1 mr-2">
+          <Text className="text-2xl font-black text-slate-900 dark:text-white">
             Saved Questions
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Review your bookmarked high-yield questions and explanations
-          </p>
-        </div>
-        <div className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800">
-          <Bookmark className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-          <span>{bookmarks.length} Saved</span>
-        </div>
-      </div>
+          </Text>
+          <Text className="text-xs text-slate-500 mt-0.5">
+            Review your bookmarked high-yield questions
+          </Text>
+        </View>
+        <View className="flex-row items-center bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+          <Bookmark size={14} color="#f59e0b" fill="#f59e0b" />
+          <Text className="text-xs font-bold text-amber-600 dark:text-amber-400 ml-1">
+            {bookmarks.length} Saved
+          </Text>
+        </View>
+      </View>
 
       {bookmarks.length === 0 && !loading ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
-          <Bookmark className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <h3 className="font-bold text-slate-800 dark:text-slate-200 text-base">
+        <View className="items-center py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
+          <Bookmark size={40} color="#cbd5e1" />
+          <Text className="font-extrabold text-slate-800 dark:text-slate-200 text-base mt-2">
             No bookmarks yet
-          </h3>
-          <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1">
+          </Text>
+          <Text className="text-xs text-slate-500 text-center max-w-xs mt-1">
             Tap the bookmark icon on any question during or after a quiz to save it for revision.
-          </p>
-        </div>
+          </Text>
+        </View>
       ) : (
-        <div className="space-y-4">
+        <View className="space-y-4">
           {bookmarks.map((bmk) => {
             const q = bmk.question;
-            const correctOpt = q.options?.find((o) => o.isCorrect);
 
             return (
-              <div
+              <View
                 key={bmk.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 shadow-xs space-y-3"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm space-y-3"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
-                      {q.subjectName || 'General'}
-                    </span>
-                    <span className="text-[10px] font-semibold text-slate-500">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center space-x-2">
+                    <View className="bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full mr-1.5">
+                      <Text className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                        {q.subjectName || 'General'}
+                      </Text>
+                    </View>
+                    <Text className="text-[10px] font-semibold text-slate-400">
                       {q.difficulty}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleRemove(q.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
-                    title="Remove from bookmarks"
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleRemove(q.id)}
+                    className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                    <Trash2 size={16} color="#e11d48" />
+                  </TouchableOpacity>
+                </View>
 
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm leading-snug">
+                <Text className="font-black text-slate-900 dark:text-white text-sm leading-snug">
                   {q.questionText}
-                </h3>
+                </Text>
 
                 {/* Options List */}
-                <div className="space-y-1.5 pt-1">
-                  {q.options?.map((opt, i) => (
-                    <div
+                <View className="space-y-1.5 pt-1">
+                  {q.options?.map((opt: Option, i: number) => (
+                    <View
                       key={opt.id}
-                      className={`p-2.5 rounded-xl text-xs font-medium flex items-center justify-between ${
+                      className={`p-2.5 rounded-2xl flex-row items-center justify-between ${
                         opt.isCorrect
-                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 font-semibold border border-emerald-200 dark:border-emerald-800'
-                          : 'bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800'
+                          : 'bg-slate-50 dark:bg-slate-800/60'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-md bg-white dark:bg-slate-800 text-[10px] font-bold flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                          {String.fromCharCode(65 + i)}
-                        </span>
-                        <span>{opt.optionText}</span>
-                      </div>
-                      {opt.isCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
-                    </div>
+                      <View className="flex-row items-center flex-1 mr-2">
+                        <View className="w-5 h-5 rounded-md bg-white dark:bg-slate-800 items-center justify-center mr-2 border border-slate-200 dark:border-slate-700">
+                          <Text className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                            {String.fromCharCode(65 + i)}
+                          </Text>
+                        </View>
+                        <Text
+                          className={`text-xs flex-1 ${
+                            opt.isCorrect
+                              ? 'text-emerald-800 dark:text-emerald-200 font-bold'
+                              : 'text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          {opt.optionText}
+                        </Text>
+                      </View>
+                      {opt.isCorrect && <CheckCircle2 size={16} color="#059669" />}
+                    </View>
                   ))}
-                </div>
+                </View>
 
                 {/* Detailed Explanation */}
                 {q.explanation && (
-                  <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                    <span className="font-bold text-slate-900 dark:text-white block mb-0.5">
+                  <View className="bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-2xl p-3">
+                    <Text className="font-extrabold text-slate-900 dark:text-white text-xs mb-0.5">
                       Explanation:
-                    </span>
-                    {q.explanation}
-                  </div>
+                    </Text>
+                    <Text className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                      {q.explanation}
+                    </Text>
+                  </View>
                 )}
-              </div>
+              </View>
             );
           })}
-        </div>
+        </View>
       )}
-    </div>
+    </ScrollView>
   );
 };

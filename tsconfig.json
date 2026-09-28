@@ -19,6 +19,12 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "react-native": [
+        "./src/react-native-shim.tsx"
+      ],
+      "lucide-react-native": [
+        "./src/lucide-react-native-shim.tsx"
       ]
     },
     "allowImportingTsExtensions": true,

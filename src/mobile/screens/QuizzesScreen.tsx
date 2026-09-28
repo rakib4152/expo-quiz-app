@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Filter, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { Search, Sparkles } from 'lucide-react-native';
 import { api } from '../services/api/client.ts';
 import { QuizCard } from '../components/ui/Cards.tsx';
 import type { Quiz, Subject } from '../../types/quiz.ts';
@@ -15,7 +16,6 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
-  const [loading, setLoading] = useState(true);
 
   const fetchFilters = async () => {
     try {
@@ -27,7 +27,6 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
   };
 
   const fetchQuizzes = async () => {
-    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (search.trim()) params.append('search', search.trim());
@@ -40,9 +39,7 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
         setQuizzes(res.data);
       }
     } catch (e) {
-      console.error('Failed to fetch quizzes:', e);
-    } finally {
-      setLoading(false);
+      console.error(e);
     }
   };
 
@@ -58,93 +55,103 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
   }, [search, selectedSubjectId, selectedDifficulty, sortBy]);
 
   return (
-    <div className="space-y-5 pb-20">
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+    <ScrollView className="flex-1 space-y-4 pb-12" showsVerticalScrollIndicator={false}>
+      <View>
+        <Text className="text-2xl font-black text-slate-900 dark:text-white">
           Explore Quizzes
-        </h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        </Text>
+        <Text className="text-xs text-slate-500 mt-0.5">
           Search, filter by subject & difficulty, and test your exam readiness
-        </p>
-      </div>
+        </Text>
+      </View>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
+      {/* Search Input Bar */}
+      <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-row items-center px-3.5 py-2.5">
+        <Search size={16} color="#94a3b8" />
+        <TextInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChangeText={setSearch}
           placeholder="Search quizzes by title or keyword..."
-          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-slate-900 dark:text-white"
+          placeholderTextColor="#94a3b8"
+          className="ml-2.5 flex-1 text-xs text-slate-900 dark:text-white"
         />
-      </div>
+      </View>
 
       {/* Subject Filter Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        <button
-          onClick={() => setSelectedSubjectId('all')}
-          className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+        <TouchableOpacity
+          onPress={() => setSelectedSubjectId('all')}
+          className={`px-3 py-1.5 rounded-full mr-2 ${
             selectedSubjectId === 'all'
-              ? 'bg-emerald-600 text-white shadow-xs'
-              : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+              ? 'bg-emerald-600'
+              : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
           }`}
         >
-          All Subjects
-        </button>
-        {subjects.map((sub) => (
-          <button
-            key={sub.id}
-            onClick={() => setSelectedSubjectId(sub.id)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-              selectedSubjectId === sub.id
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+          <Text
+            className={`text-xs font-bold ${
+              selectedSubjectId === 'all' ? 'text-white' : 'text-slate-600 dark:text-slate-300'
             }`}
           >
-            {sub.name}
-          </button>
-        ))}
-      </div>
+            All Subjects
+          </Text>
+        </TouchableOpacity>
 
-      {/* Secondary Filters (Difficulty & Sort) */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1">
-          {['all', 'EASY', 'MEDIUM', 'HARD'].map((diff) => (
-            <button
-              key={diff}
-              onClick={() => setSelectedDifficulty(diff)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase transition-colors ${
+        {subjects.map((sub) => (
+          <TouchableOpacity
+            key={sub.id}
+            onPress={() => setSelectedSubjectId(sub.id)}
+            className={`px-3 py-1.5 rounded-full mr-2 ${
+              selectedSubjectId === sub.id
+                ? 'bg-emerald-600'
+                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
+            }`}
+          >
+            <Text
+              className={`text-xs font-bold ${
+                selectedSubjectId === sub.id ? 'text-white' : 'text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              {sub.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Difficulty Filters */}
+      <View className="flex-row items-center space-x-1.5">
+        {['all', 'EASY', 'MEDIUM', 'HARD'].map((diff) => (
+          <TouchableOpacity
+            key={diff}
+            onPress={() => setSelectedDifficulty(diff)}
+            className={`px-2.5 py-1 rounded-xl mr-1.5 ${
+              selectedDifficulty === diff
+                ? 'bg-slate-800 dark:bg-slate-700'
+                : 'bg-slate-100 dark:bg-slate-800'
+            }`}
+          >
+            <Text
+              className={`text-[11px] font-extrabold uppercase ${
                 selectedDifficulty === diff
-                  ? 'bg-slate-800 text-white dark:bg-slate-700'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  ? 'text-white'
+                  : 'text-slate-500'
               }`}
             >
               {diff === 'all' ? 'Any' : diff}
-            </button>
-          ))}
-        </div>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          aria-label="Sort quizzes"
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold rounded-lg px-2.5 py-1 text-slate-700 dark:text-slate-300 focus:outline-none"
-        >
-          <option value="newest">Newest</option>
-          <option value="popular">Most Popular</option>
-          <option value="duration">Shortest First</option>
-        </select>
-      </div>
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       {/* Quiz List */}
-      <div className="space-y-3">
-        {quizzes.length === 0 && !loading ? (
-          <div className="text-center py-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
-            <Sparkles className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-50" />
-            <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm">No quizzes found</h3>
-            <p className="text-xs text-slate-500 mt-1">Try changing your search term or filters.</p>
-          </div>
+      <View className="space-y-3">
+        {quizzes.length === 0 ? (
+          <View className="items-center py-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
+            <Sparkles size={28} color="#94a3b8" />
+            <Text className="font-extrabold text-slate-700 dark:text-slate-300 text-sm mt-2">
+              No quizzes found
+            </Text>
+            <Text className="text-xs text-slate-500 mt-1">Try changing your filters.</Text>
+          </View>
         ) : (
           quizzes.map((quiz) => (
             <QuizCard
@@ -155,7 +162,7 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
             />
           ))
         )}
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 };

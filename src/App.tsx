@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import {
   Smartphone,
   Layers,
@@ -7,9 +8,8 @@ import {
   Sparkles,
   Maximize2,
   Minimize2,
-  CheckCircle2,
   Activity,
-} from 'lucide-react';
+} from 'lucide-react-native';
 import { MobileApp } from './mobile/MobileApp.tsx';
 import { ArchitectureDocs } from './components/ArchitectureDocs.tsx';
 import { useNetwork } from './mobile/store/networkStore.ts';
@@ -49,158 +49,169 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      {/* Top Navigation & Applet Controls */}
-      <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 py-2.5">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <SafeAreaView className="flex-1 bg-slate-900">
+      {/* Top Header Bar */}
+      <View className="bg-slate-950/90 border-b border-slate-800 px-4 py-3">
+        <View className="max-w-7xl mx-auto flex-row flex-wrap items-center justify-between">
           {/* Brand */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-sm shadow-emerald-500/30">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-white text-sm tracking-tight">QuizPulse</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Expo + Next.js REST
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-400 hidden sm:block">
-                Mobile Quiz Platform • React Native + Prisma + PostgreSQL Architecture
-              </p>
-            </div>
-          </div>
+          <View className="flex-row items-center space-x-2.5">
+            <View className="w-8 h-8 rounded-xl bg-emerald-600 items-center justify-center mr-2 shadow-sm">
+              <Sparkles size={16} color="#ffffff" />
+            </View>
+            <View>
+              <View className="flex-row items-center">
+                <Text className="font-black text-white text-sm">QuizPulse</Text>
+                <View className="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                  <Text className="text-[10px] font-mono font-bold text-emerald-400">
+                    Expo + NativeWind v4
+                  </Text>
+                </View>
+              </View>
+              <Text className="text-[10px] text-slate-400">
+                Pure React Native Primitives (View, Text, TouchableOpacity, Pressable)
+              </Text>
+            </View>
+          </View>
 
-          {/* Center Tabs: Mobile Simulator vs Architecture */}
-          <div className="flex p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-300">
-            <button
-              onClick={() => setViewMode('mobile')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'mobile'
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/20'
-                  : 'hover:text-white'
+          {/* Mode Switch: Mobile App vs Architecture & Microservices */}
+          <View className="flex-row p-1 bg-slate-900 border border-slate-800 rounded-2xl my-1">
+            <TouchableOpacity
+              onPress={() => setViewMode('mobile')}
+              className={`flex-row items-center px-3 py-1.5 rounded-xl ${
+                viewMode === 'mobile' ? 'bg-emerald-600 shadow-sm' : ''
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>Mobile App Simulator</span>
-            </button>
-            <button
-              onClick={() => setViewMode('architecture')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'architecture'
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/20'
-                  : 'hover:text-white'
+              <Smartphone size={14} color="#ffffff" />
+              <Text className="text-white text-xs font-bold ml-1.5">Mobile Simulator</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setViewMode('architecture')}
+              className={`flex-row items-center px-3 py-1.5 rounded-xl ${
+                viewMode === 'architecture' ? 'bg-emerald-600 shadow-sm' : ''
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Architecture & REST APIs</span>
-            </button>
-          </div>
+              <Layers size={14} color="#ffffff" />
+              <Text className="text-white text-xs font-bold ml-1.5">Architecture & Microservices</Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Right Controls: Network Simulation & Frame Toggle */}
-          <div className="flex items-center gap-2">
-            {/* API Health badge */}
-            <div
-              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+          {/* Controls: Network & Device Frame */}
+          <View className="flex-row items-center space-x-2">
+            <View
+              className={`flex-row items-center px-2.5 py-1 rounded-full border mr-2 ${
                 apiHealth === 'healthy'
-                  ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
-                  : 'bg-amber-950/60 text-amber-400 border-amber-800'
+                  ? 'bg-emerald-950/60 border-emerald-800'
+                  : 'bg-amber-950/60 border-amber-800'
               }`}
-              title="REST Backend Health Status"
             >
-              <Activity className="w-3 h-3 text-emerald-500" />
-              <span>REST API: 200 OK</span>
-            </div>
+              <Activity size={12} color="#10b981" />
+              <Text className="text-emerald-400 text-[11px] font-bold ml-1">
+                REST Microservices: 200 OK
+              </Text>
+            </View>
 
-            {/* Offline Simulation Toggle */}
-            <button
-              onClick={toggleNetwork}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+            <TouchableOpacity
+              onPress={toggleNetwork}
+              className={`flex-row items-center px-3 py-1.5 rounded-2xl border mr-1.5 ${
                 isOnline
-                  ? 'bg-slate-900 border-slate-800 text-emerald-400 hover:bg-slate-800'
-                  : 'bg-amber-500 text-slate-950 border-amber-400 hover:bg-amber-400 font-extrabold'
+                  ? 'bg-slate-900 border-slate-800'
+                  : 'bg-amber-500 border-amber-400'
               }`}
-              title={isOnline ? 'Switch to Offline taking mode' : 'Switch back to Online'}
             >
-              {isOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-              <span>{isOnline ? 'Online' : 'Offline'}</span>
-              {pendingCount > 0 && (
-                <span className="bg-amber-950 text-amber-200 text-[10px] px-1.5 rounded-full">
-                  {pendingCount}
-                </span>
+              {isOnline ? (
+                <Wifi size={14} color="#10b981" />
+              ) : (
+                <WifiOff size={14} color="#0f172a" />
               )}
-            </button>
-
-            {/* Frame Viewport Toggle */}
-            {viewMode === 'mobile' && (
-              <button
-                onClick={() => setDeviceFrame(!deviceFrame)}
-                className="p-1.5 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 transition-colors"
-                title={deviceFrame ? 'Expand to Full Screen' : 'Show Phone Frame'}
+              <Text
+                className={`text-xs font-black ml-1.5 ${
+                  isOnline ? 'text-emerald-400' : 'text-slate-950'
+                }`}
               >
-                {deviceFrame ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
-              </button>
+                {isOnline ? 'Online' : 'Offline'}
+              </Text>
+              {pendingCount > 0 && (
+                <View className="ml-1.5 bg-amber-950 px-1.5 rounded-full">
+                  <Text className="text-amber-200 text-[10px] font-bold">{pendingCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {viewMode === 'mobile' && (
+              <TouchableOpacity
+                onPress={() => setDeviceFrame(!deviceFrame)}
+                className="p-2 rounded-2xl border border-slate-800 bg-slate-900"
+              >
+                {deviceFrame ? (
+                  <Maximize2 size={16} color="#cbd5e1" />
+                ) : (
+                  <Minimize2 size={16} color="#cbd5e1" />
+                )}
+              </TouchableOpacity>
             )}
-          </div>
-        </div>
-      </header>
+          </View>
+        </View>
+      </View>
 
       {/* Main Body */}
-      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 overflow-x-hidden">
+      <View className="flex-1 items-center justify-center p-2 sm:p-4">
         {viewMode === 'mobile' ? (
-          <div className="w-full flex justify-center py-2">
+          <View className="w-full items-center py-2">
             {deviceFrame ? (
               /* Phone Device Frame */
-              <div className="relative w-full max-w-[420px] bg-slate-950 rounded-[48px] p-3 shadow-2xl ring-1 ring-slate-800 shadow-emerald-950/20 border-4 border-slate-800">
-                {/* Dynamic Island / Camera Notch */}
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-50 flex items-center justify-between px-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-1 ring-slate-800"></span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500/60"></span>
-                </div>
+              <View className="w-full max-w-[420px] bg-slate-950 rounded-[48px] p-3 shadow-2xl border-4 border-slate-800">
+                {/* Dynamic Island */}
+                <View className="w-28 h-5 bg-black rounded-full self-center flex-row items-center justify-between px-2.5 mb-1 z-50">
+                  <View className="w-2.5 h-2.5 rounded-full bg-slate-900" />
+                  <View className="w-2 h-2 rounded-full bg-emerald-500/60" />
+                </View>
 
                 {/* Simulated Native Screen */}
-                <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-[38px] overflow-hidden min-h-[640px] max-h-[820px] flex flex-col relative shadow-inner">
+                <View className="bg-white dark:bg-slate-950 rounded-[38px] overflow-hidden min-h-[640px] max-h-[820px] flex-col relative">
                   {/* Status Bar */}
-                  <div className="pt-3 pb-1 px-6 flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 select-none z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xs">
-                    <span>{currentTime}</span>
-                    <div className="flex items-center gap-1.5">
+                  <View className="pt-2 pb-1 px-6 flex-row items-center justify-between bg-white/80 dark:bg-slate-950/80">
+                    <Text className="text-[11px] font-extrabold text-slate-600 dark:text-slate-400">
+                      {currentTime}
+                    </Text>
+                    <View className="flex-row items-center space-x-1.5">
                       {isOnline ? (
-                        <Wifi className="w-3.5 h-3.5 text-slate-500" />
+                        <Wifi size={14} color="#64748b" />
                       ) : (
-                        <WifiOff className="w-3.5 h-3.5 text-amber-500" />
+                        <WifiOff size={14} color="#f59e0b" />
                       )}
-                      <span className="text-[10px] font-mono">5G</span>
-                      <div className="w-5 h-2.5 rounded-sm border border-slate-500 dark:border-slate-400 p-0.5 flex items-center">
-                        <div className="h-full w-full bg-emerald-500 rounded-2xs"></div>
-                      </div>
-                    </div>
-                  </div>
+                      <Text className="text-[10px] font-mono text-slate-500 font-bold ml-1 mr-1">5G</Text>
+                      <View className="w-5 h-2.5 rounded-xs border border-slate-400 p-0.5 items-center justify-center">
+                        <View className="h-full w-full bg-emerald-500 rounded-2xs" />
+                      </View>
+                    </View>
+                  </View>
 
-                  {/* Scrollable Screen Content */}
-                  <div className="flex-1 overflow-y-auto px-4 pt-2">
+                  {/* Mobile Screen Content */}
+                  <View className="flex-1 px-4 pt-1">
                     <MobileApp />
-                  </div>
+                  </View>
 
                   {/* Home Indicator Bar */}
-                  <div className="py-1.5 flex justify-center bg-white/90 dark:bg-slate-950/90 z-40">
-                    <div className="w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
-                  </div>
-                </div>
-              </div>
+                  <View className="py-2 items-center bg-white/90 dark:bg-slate-950/90">
+                    <View className="w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
+                  </View>
+                </View>
+              </View>
             ) : (
               /* Full Screen Responsive View */
-              <div className="w-full max-w-xl bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-3xl p-5 border border-slate-800 shadow-xl min-h-[600px]">
+              <View className="w-full max-w-xl bg-white dark:bg-slate-950 rounded-3xl p-5 border border-slate-800 shadow-xl min-h-[600px]">
                 <MobileApp />
-              </div>
+              </View>
             )}
-          </div>
+          </View>
         ) : (
-          /* Architecture & REST API Explorer */
-          <div className="w-full py-4">
+          /* Architecture & Microservices Docs */
+          <View className="w-full py-4">
             <ArchitectureDocs />
-          </div>
+          </View>
         )}
-      </main>
-    </div>
+      </View>
+    </SafeAreaView>
   );
 }

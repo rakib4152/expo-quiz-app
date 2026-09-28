@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import {
   Sparkles,
   Trophy,
   Flame,
   ArrowRight,
   TrendingUp,
-  Wifi,
   WifiOff,
   RefreshCw,
   Award,
-  BookOpen,
-} from 'lucide-react';
+} from 'lucide-react-native';
 import { useAuth } from '../store/authStore.ts';
 import { useNetwork } from '../store/networkStore.ts';
 import { api } from '../services/api/client.ts';
@@ -38,10 +37,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [progress, setProgress] = useState<UserProgressData | null>(null);
   const [topLeader, setTopLeader] = useState<LeaderboardEntry | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
-    setIsLoading(true);
     try {
       const [quizRes, subRes, progRes, leadRes] = await Promise.all([
         api.get<Quiz[]>('/quizzes?limit=4'),
@@ -56,8 +53,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       if (leadRes.data?.leaderboard?.length) setTopLeader(leadRes.data.leaderboard[0]);
     } catch (e) {
       console.error('Home load error:', e);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -66,188 +61,209 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   }, [isOnline]);
 
   return (
-    <div className="space-y-6 pb-20">
+    <ScrollView className="flex-1 space-y-5 pb-8" showsVerticalScrollIndicator={false}>
       {/* Offline banner if offline */}
       {!isOnline && (
-        <div className="bg-amber-500 text-white px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-semibold shadow-sm">
-          <div className="flex items-center gap-2">
-            <WifiOff className="w-4 h-4" />
-            <span>Offline Mode Active • Saved quizzes available</span>
-          </div>
+        <View className="bg-amber-500 px-4 py-2.5 rounded-2xl flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <WifiOff size={16} color="#ffffff" />
+            <Text className="text-white text-xs font-bold ml-2">
+              Offline Mode • Saved quizzes available
+            </Text>
+          </View>
           {pendingCount > 0 && (
-            <span className="bg-white/20 px-2 py-0.5 rounded-full">
-              {pendingCount} attempt{pendingCount > 1 ? 's' : ''} to sync
-            </span>
+            <View className="bg-white/20 px-2 py-0.5 rounded-full">
+              <Text className="text-white text-[10px] font-bold">
+                {pendingCount} to sync
+              </Text>
+            </View>
           )}
-        </div>
+        </View>
       )}
 
       {/* Greeting Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>DAILY PREPARATION DASHBOARD</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-0.5 tracking-tight">
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1 mr-2">
+          <View className="flex-row items-center">
+            <Sparkles size={14} color="#059669" />
+            <Text className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-1">
+              DAILY PREPARATION DASHBOARD
+            </Text>
+          </View>
+          <Text className="text-2xl font-black text-slate-900 dark:text-white mt-1">
             Hello, {user?.name?.split(' ')[0] || 'Scholar'} 👋
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          </Text>
+          <Text className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Ready to test your knowledge today?
-          </p>
-        </div>
+          </Text>
+        </View>
 
         {/* Streak & Sync Pill */}
-        <div className="flex items-center gap-2">
+        <View className="flex-row items-center space-x-2">
           {pendingCount > 0 && isOnline && (
-            <button
-              onClick={() => syncOfflineAttempts()}
+            <TouchableOpacity
+              onPress={() => syncOfflineAttempts()}
               disabled={isSyncing}
-              className="flex items-center gap-1 text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-full"
+              className="flex-row items-center bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-full mr-1.5"
             >
-              <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span>Sync ({pendingCount})</span>
-            </button>
+              <RefreshCw size={12} color="#059669" />
+              <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold ml-1">
+                Sync ({pendingCount})
+              </Text>
+            </TouchableOpacity>
           )}
 
-          <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full text-xs font-bold">
-            <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>{progress?.streakDays || 4} Days Streak</span>
-          </div>
-        </div>
-      </div>
+          <View className="flex-row items-center bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-full">
+            <Flame size={14} color="#f59e0b" />
+            <Text className="text-amber-700 dark:text-amber-400 text-xs font-bold ml-1">
+              {progress?.streakDays || 4}d Streak
+            </Text>
+          </View>
+        </View>
+      </View>
 
       {/* Continue Learning Featured Card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-800 rounded-3xl p-5 text-white shadow-lg shadow-emerald-900/20">
-        <div className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-        <div className="flex items-center justify-between text-xs text-emerald-100 font-semibold mb-2">
-          <span className="uppercase tracking-wider">Active Subject</span>
-          <span className="bg-white/20 px-2 py-0.5 rounded-full">60% Mastered</span>
-        </div>
+      <View className="bg-emerald-700 rounded-3xl p-5 shadow-lg">
+        <View className="flex-row items-center justify-between mb-2">
+          <Text className="text-xs text-emerald-100 font-bold uppercase tracking-wider">
+            Active Subject
+          </Text>
+          <View className="bg-white/20 px-2 py-0.5 rounded-full">
+            <Text className="text-white text-[10px] font-extrabold">60% Mastered</Text>
+          </View>
+        </View>
 
-        <h3 className="text-lg font-bold leading-snug">
+        <Text className="text-white text-lg font-black leading-snug">
           Bangladesh Affairs: Constitution & Liberation War
-        </h3>
-        <p className="text-xs text-emerald-100/90 mt-1 mb-4">
+        </Text>
+        <Text className="text-xs text-emerald-100/90 mt-1 mb-4">
           12 of 20 high-yield questions practiced this week
-        </p>
+        </Text>
 
-        <div className="space-y-1 mb-4">
-          <ProgressBar current={12} total={20} color="bg-white" className="h-1.5" />
-        </div>
+        <ProgressBar current={12} total={20} color="bg-white" className="mb-4" />
 
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-2 text-xs text-emerald-100">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Accuracy: 84%</span>
-          </div>
-          <button
-            onClick={() => {
+        <View className="flex-row items-center justify-between pt-1">
+          <View className="flex-row items-center">
+            <TrendingUp size={14} color="#d1fae5" />
+            <Text className="text-xs text-emerald-100 font-bold ml-1">Accuracy: 84%</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
               if (quizzes[0]) onNavigateToQuiz(quizzes[0].id);
             }}
-            className="inline-flex items-center gap-1.5 bg-white text-emerald-800 hover:bg-emerald-50 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-transform active:scale-95 shadow-xs"
+            className="flex-row items-center bg-white px-3.5 py-1.5 rounded-xl shadow-xs"
           >
-            <span>Continue</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+            <Text className="text-emerald-800 text-xs font-bold mr-1">Continue</Text>
+            <ArrowRight size={14} color="#065f46" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {/* Subjects Section */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">
+      <View className="space-y-3">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-base font-extrabold text-slate-900 dark:text-white">
             Subjects
-          </h2>
-          <button
-            onClick={() => onNavigateToTab('subjects')}
-            className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5"
+          </Text>
+          <TouchableOpacity
+            onPress={() => onNavigateToTab('subjects')}
+            className="flex-row items-center"
           >
-            <span>View All</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+            <Text className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mr-1">
+              View All
+            </Text>
+            <ArrowRight size={12} color="#059669" />
+          </TouchableOpacity>
+        </View>
 
-        <div className="grid grid-cols-2 gap-3">
+        <View className="flex-row flex-wrap justify-between">
           {subjects.map((sub) => (
-            <SubjectCard
-              key={sub.id}
-              subject={sub}
-              onPress={(id) => onNavigateToSubject(id)}
-            />
+            <View key={sub.id} className="w-[48%] mb-3">
+              <SubjectCard
+                subject={sub}
+                onPress={(id) => onNavigateToSubject(id)}
+              />
+            </View>
           ))}
-        </div>
-      </div>
+        </View>
+      </View>
 
       {/* Recommended Quizzes Section */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
+      <View className="space-y-3">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-base font-extrabold text-slate-900 dark:text-white">
               Recommended Quizzes
-            </h2>
-            <p className="text-xs text-slate-500">Hand-picked by performance</p>
-          </div>
-          <button
-            onClick={() => onNavigateToTab('quizzes')}
-            className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5"
+            </Text>
+            <Text className="text-xs text-slate-500">Hand-picked by performance</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => onNavigateToTab('quizzes')}
+            className="flex-row items-center"
           >
-            <span>All Quizzes</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+            <Text className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mr-1">
+              All Quizzes
+            </Text>
+            <ArrowRight size={12} color="#059669" />
+          </TouchableOpacity>
+        </View>
 
-        <div className="space-y-3">
+        <View className="space-y-3">
           {quizzes.map((quiz) => (
             <QuizCard
               key={quiz.id}
               quiz={quiz}
               onPress={(id) => onNavigateToQuiz(id)}
+              onDownloaded={() => loadData()}
             />
           ))}
-        </div>
-      </div>
+        </View>
+      </View>
 
       {/* Progress & Leaderboard Snippet */}
-      <div className="grid grid-cols-2 gap-3">
+      <View className="flex-row justify-between mb-16">
         {/* Your Progress */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-2">
-            <Award className="w-4 h-4 text-emerald-500" />
-            <span>Your Progress</span>
-          </div>
-          <div className="text-xl font-extrabold text-slate-900 dark:text-white">
+        <View className="w-[48%] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4">
+          <View className="flex-row items-center mb-2">
+            <Award size={16} color="#10b981" />
+            <Text className="text-xs font-bold text-slate-500 ml-1.5">Progress</Text>
+          </View>
+          <Text className="text-xl font-black text-slate-900 dark:text-white">
             {progress?.totalQuestionsAnswered || 42}
-          </div>
-          <p className="text-[11px] text-slate-500">Questions solved</p>
-          <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-            Avg Score: {progress?.averageScore || 83.3}%
-          </div>
-        </div>
+          </Text>
+          <Text className="text-[11px] text-slate-500">Questions solved</Text>
+          <View className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+            <Text className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+              Avg: {progress?.averageScore || 83.3}%
+            </Text>
+          </View>
+        </View>
 
         {/* Leaderboard Snippet */}
-        <div
-          onClick={onNavigateToLeaderboard}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+        <TouchableOpacity
+          onPress={onNavigateToLeaderboard}
+          className="w-[48%] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4"
         >
-          <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
-            <div className="flex items-center gap-1.5">
-              <Trophy className="w-4 h-4 text-amber-500" />
-              <span>Leaderboard</span>
-            </div>
-            <ArrowRight className="w-3 h-3 text-slate-400" />
-          </div>
-          <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
-            #3 <span className="text-xs font-normal text-slate-400">Rank</span>
-          </div>
-          <p className="text-[11px] text-slate-500 truncate">
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center">
+              <Trophy size={16} color="#f59e0b" />
+              <Text className="text-xs font-bold text-slate-500 ml-1.5">Leaderboard</Text>
+            </View>
+            <ArrowRight size={14} color="#94a3b8" />
+          </View>
+          <Text className="text-xl font-black text-amber-600 dark:text-amber-400">
+            #3 <Text className="text-xs font-normal text-slate-400">Rank</Text>
+          </Text>
+          <Text numberOfLines={1} className="text-[11px] text-slate-500">
             Top: {topLeader?.userName || 'Tanvir Hossain'}
-          </p>
-          <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-            View Ranking →
-          </div>
-        </div>
-      </div>
-    </div>
+          </Text>
+          <View className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+            <Text className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+              View Ranking →
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
