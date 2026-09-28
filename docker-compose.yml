@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # 1. Edge API Gateway / Ingress Router
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gateway
+    container_name: quizpulse-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - CATALOG_SERVICE_URL=http://catalog-service:4002
+      - EXAM_SERVICE_URL=http://exam-service:4003
+      - ANALYTICS_SERVICE_URL=http://analytics-service:4004
+      - BOOKMARKS_SERVICE_URL=http://bookmarks-service:4005
+      - REDIS_URL=redis://message-broker:6379
+    depends_on:
+      - auth-service
+      - catalog-service
+      - exam-service
+      - analytics-service
+      - bookmarks-service
+      - message-broker
+    networks:
+      - quizpulse-network
+
+  # 2. Identity & Authentication Microservice
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.auth
+    container_name: quizpulse-auth-service
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - DATABASE_URL=postgresql://quiz_user:quiz_secret@postgres-db:5432/quizpulse_auth?schema=public
+      - JWT_SECRET=quizpulse_super_secret_jwt_key_2026
+      - REDIS_URL=redis://message-broker:6379
+    depends_on:
+      - postgres-db
+      - message-broker
+    networks:
+      - quizpulse-network
+
+  # 3. Content & Quiz Catalog Microservice
+  catalog-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.catalog
+    container_name: quizpulse-catalog-service
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - DATABASE_URL=postgresql://quiz_user:quiz_secret@postgres-db:5432/quizpulse_catalog?schema=public
+    depends_on:
+      - postgres-db
+    networks:
+      - quizpulse-network
+
+  # 4. Exam Taking & Scoring Engine Microservice
+  exam-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.exam
+    container_name: quizpulse-exam-service
+    ports:
+      - "4003:4003"
+    environment:
+      - PORT=4003
+      - DATABASE_URL=postgresql://quiz_user:quiz_secret@postgres-db:5432/quizpulse_exam?schema=public
+      - REDIS_URL=redis://message-broker:6379
+    depends_on:
+      - postgres-db
+      - message-broker
+    networks:
+      - quizpulse-network
+
+  # 5. Analytics & Leaderboard Microservice
+  analytics-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.analytics
+    container_name: quizpulse-analytics-service
+    ports:
+      - "4004:4004"
+    environment:
+      - PORT=4004
+      - DATABASE_URL=postgresql://quiz_user:quiz_secret@postgres-db:5432/quizpulse_analytics?schema=public
+      - REDIS_URL=redis://message-broker:6379
+    depends_on:
+      - postgres-db
+      - message-broker
+    networks:
+      - quizpulse-network
+
+  # 6. Bookmarks & Collections Microservice
+  bookmarks-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.bookmarks
+    container_name: quizpulse-bookmarks-service
+    ports:
+      - "4005:4005"
+    environment:
+      - PORT=4005
+      - DATABASE_URL=postgresql://quiz_user:quiz_secret@postgres-db:5432/quizpulse_bookmarks?schema=public
+      - REDIS_URL=redis://message-broker:6379
+    depends_on:
+      - postgres-db
+      - message-broker
+    networks:
+      - quizpulse-network
+
+  # 7. Message Broker (Event Bus)
+  message-broker:
+    image: redis:7-alpine
+    container_name: quizpulse-redis-broker
+    ports:
+      - "6379:6379"
+    networks:
+      - quizpulse-network
+
+  # 8. Relational Database Cluster (PostgreSQL)
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: quizpulse-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=quiz_user
+      - POSTGRES_PASSWORD=quiz_secret
+      - POSTGRES_DB=quizpulse
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - quizpulse-network
+
+volumes:
+  postgres_data:
+
+networks:
+  quizpulse-network:
+    driver: bridge
