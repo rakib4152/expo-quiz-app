@@ -18,13 +18,15 @@
     "@vitejs/plugin-react": "^6.1.1",
     "canvas-confetti": "^1.9.4",
     "dotenv": "^17.2.3",
+    "expo": "^57.0.25",
     "express": "^4.21.2",
     "lucide-react": "^0.546.0",
     "lucide-react-native": "^1.48.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
-    "react-native-svg": "^15.15.5",
+    "react-native": "^0.87.1",
+    "react-native-svg": "^15.15.4",
     "vite": "^8.3.0"
   },
   "devDependencies": {
