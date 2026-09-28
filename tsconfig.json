@@ -23,8 +23,8 @@
       "react-native": [
         "./src/react-native-shim.tsx"
       ],
-      "lucide-react-native": [
-        "./src/lucide-react-native-shim.tsx"
+      "react-native-svg": [
+        "./src/react-native-svg-shim.tsx"
       ]
     },
     "allowImportingTsExtensions": true,

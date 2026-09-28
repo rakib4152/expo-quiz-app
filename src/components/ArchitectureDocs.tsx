@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import {
   Server,
   Smartphone,
@@ -9,16 +10,12 @@ import {
   Terminal,
   CheckCircle,
   Copy,
-  ExternalLink,
   ChevronRight,
-  Send,
   Boxes,
-  Cpu,
   Activity,
   Radio,
   RefreshCw,
-  GitBranch,
-} from 'lucide-react';
+} from 'lucide-react-native';
 import { api } from '../mobile/services/api/client.ts';
 
 export const ArchitectureDocs: React.FC = () => {
@@ -29,7 +26,9 @@ export const ArchitectureDocs: React.FC = () => {
   const [isLoadingStatus, setIsLoadingStatus] = useState(false);
 
   const copyToClipboard = (text: string, sectionId: string) => {
-    navigator.clipboard.writeText(text);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    }
     setCopiedSection(sectionId);
     setTimeout(() => setCopiedSection(null), 2000);
   };
@@ -55,63 +54,68 @@ export const ArchitectureDocs: React.FC = () => {
   }, [activeTab]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 text-slate-800 dark:text-slate-200">
+    <ScrollView className="max-w-5xl mx-auto space-y-6 text-slate-800 dark:text-slate-200" showsVerticalScrollIndicator={false}>
       {/* Navigation Sub-Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 pb-2 space-x-2 overflow-x-auto no-scrollbar">
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row border-b border-slate-200 dark:border-slate-800 pb-2 space-x-2">
         {[
-          { id: 'microservices', label: '1. Microservices Decomposition & Event Bus', icon: Boxes },
+          { id: 'microservices', label: '1. Microservices & Event Bus', icon: Boxes },
           { id: 'architecture', label: '2. High-Level Architecture', icon: Layers },
           { id: 'schema', label: '3. Prisma Relational Schema', icon: Database },
           { id: 'endpoints', label: '4. REST API Specification', icon: Server },
-          { id: 'codebase', label: '5. Docker Compose & Project Layout', icon: Code2 },
+          { id: 'codebase', label: '5. Docker Compose & Layout', icon: Code2 },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
-            <button
+            <TouchableOpacity
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              onPress={() => setActiveTab(tab.id as any)}
+              className={`flex-row items-center gap-2 py-2 px-3.5 rounded-xl mr-2 ${
                 isActive
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-emerald-600'
+                  : 'bg-slate-100 dark:bg-slate-800'
               }`}
             >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
+              <Icon size={16} color={isActive ? '#ffffff' : '#94a3b8'} />
+              <Text className={`text-xs font-bold ${isActive ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
           );
         })}
-      </div>
+      </ScrollView>
 
       {/* SECTION 1: Microservices Decomposition */}
       {activeTab === 'microservices' && (
-        <div className="space-y-6 animate-in fade-in duration-150">
+        <View className="space-y-6">
           {/* Microservices Topology ASCII Diagram */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Boxes className="w-5 h-5 text-emerald-600" />
-                  <span>Microservices Topology & Decoupled Architecture</span>
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
+          <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
+            <View className="flex-row items-center justify-between">
+              <View>
+                <View className="flex-row items-center gap-2">
+                  <Boxes size={20} color="#059669" />
+                  <Text className="text-xl font-extrabold text-slate-900 dark:text-white">
+                    Microservices Topology & Decoupled Architecture
+                  </Text>
+                </View>
+                <Text className="text-xs text-slate-500 mt-1">
                   Single Responsibilities • Independent Scalability • Event-Driven Asynchrony
-                </p>
-              </div>
+                </Text>
+              </View>
 
-              <button
-                onClick={fetchMicroservicesTelemetry}
+              <TouchableOpacity
+                onPress={fetchMicroservicesTelemetry}
                 disabled={isLoadingStatus}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 transition-colors"
+                className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingStatus ? 'animate-spin' : ''}`} />
-                <span>Refresh Telemetry</span>
-              </button>
-            </div>
+                <RefreshCw size={14} color="#64748b" className={isLoadingStatus ? 'animate-spin' : ''} />
+                <Text className="text-slate-700 dark:text-slate-300 text-xs font-bold ml-1">Refresh</Text>
+              </TouchableOpacity>
+            </View>
 
-            <div className="bg-slate-950 text-emerald-400 font-mono text-xs p-5 rounded-2xl overflow-x-auto leading-relaxed border border-slate-800">
-              <pre>{`                       ┌───────────────────────────────┐
+            <View className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+              <Text className="text-emerald-400 font-mono text-[11px] leading-relaxed">
+{`                       ┌───────────────────────────────┐
                        │   REACT NATIVE EXPO CLIENT    │
                        └───────────────┬───────────────┘
                                        │ HTTPS / REST (Port 3000)
@@ -145,18 +149,21 @@ export const ArchitectureDocs: React.FC = () => {
                    │                                       │
                    │ Asynchronous pub/sub decouples scoring│
                    │ from leaderboard calculation.         │
-                   └───────────────────────────────────────┘`}</pre>
-            </div>
-          </div>
+                   └───────────────────────────────────────┘`}
+              </Text>
+            </View>
+          </View>
 
           {/* Live Microservices Health & Service Registry */}
-          <div className="space-y-3">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
-              <Activity className="w-5 h-5 text-emerald-500" />
-              <span>Live Microservice Registry & Health</span>
-            </h3>
+          <View className="space-y-3">
+            <View className="flex-row items-center gap-2">
+              <Activity size={18} color="#10b981" />
+              <Text className="font-extrabold text-slate-900 dark:text-white text-base">
+                Live Microservice Registry & Health
+              </Text>
+            </View>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <View className="flex-row flex-wrap justify-between">
               {[
                 {
                   name: 'auth-service',
@@ -201,151 +208,168 @@ export const ArchitectureDocs: React.FC = () => {
                   events: 'Decoupled inter-service bus',
                 },
               ].map((svc) => (
-                <div
+                <View
                   key={svc.name}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-2.5"
+                  className="w-full sm:w-[48%] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-2 mb-3"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-2">
+                      <View className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5" />
+                      <Text className="font-mono font-bold text-xs text-slate-900 dark:text-white">
                         {svc.name}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      :{svc.port}
-                    </span>
-                  </div>
+                      </Text>
+                    </View>
+                    <View className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
+                      <Text className="text-[10px] font-mono text-slate-600 dark:text-slate-400">
+                        :{svc.port}
+                      </Text>
+                    </View>
+                  </View>
 
-                  <p className="text-xs text-slate-500 leading-snug line-clamp-2">
+                  <Text numberOfLines={2} className="text-xs text-slate-500 leading-snug">
                     {svc.desc}
-                  </p>
+                  </Text>
 
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] space-y-1">
-                    <div className="text-slate-600 dark:text-slate-400">
-                      <strong>Data Partition:</strong> {svc.db}
-                    </div>
-                    <div className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">
+                  <View className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                    <Text className="text-[11px] text-slate-600 dark:text-slate-400">
+                      DB: {svc.db}
+                    </Text>
+                    <Text className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">
                       {svc.events}
-                    </div>
-                  </div>
-                </div>
+                    </Text>
+                  </View>
+                </View>
               ))}
-            </div>
-          </div>
+            </View>
+          </View>
 
           {/* Real-Time Event Bus Activity Stream */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Radio className="w-5 h-5 text-amber-500 animate-pulse" />
-                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+          <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <Radio size={18} color="#f59e0b" />
+                <Text className="font-extrabold text-slate-900 dark:text-white text-base">
                   Message Broker Real-Time Event Stream
-                </h3>
-              </div>
-              <span className="text-xs text-slate-400">
-                {liveEvents.length} Recent Events Logged
-              </span>
-            </div>
+                </Text>
+              </View>
+              <Text className="text-xs text-slate-400">
+                {liveEvents.length} Events Logged
+              </Text>
+            </View>
 
-            <p className="text-xs text-slate-500">
+            <Text className="text-xs text-slate-500">
               When an action occurs (e.g. submitting a quiz in the mobile simulator or bookmarking a question), microservices emit decoupled events through the Message Broker.
-            </p>
+            </Text>
 
-            <div className="space-y-2 max-h-60 overflow-y-auto">
+            <View className="space-y-2">
               {liveEvents.length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-400">
-                  Waiting for events... Practice a quiz in the Mobile Simulator to see events broadcast here live!
-                </div>
+                <View className="py-6 items-center">
+                  <Text className="text-xs text-slate-400">
+                    Waiting for events... Practice a quiz in the Mobile Simulator to see events broadcast here live!
+                  </Text>
+                </View>
               ) : (
-                liveEvents.map((evt, idx) => (
-                  <div
+                liveEvents.slice(0, 5).map((evt, idx) => (
+                  <View
                     key={evt.id || idx}
-                    className="bg-slate-950 text-slate-300 font-mono text-xs p-3 rounded-xl border border-slate-800 flex items-start justify-between gap-3"
+                    className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex-row items-start justify-between"
                   >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 font-bold">[{evt.type}]</span>
-                        <span className="text-slate-500 text-[11px]">from {evt.sourceService}</span>
-                      </div>
-                      <div className="text-slate-400 text-[11px] mt-1 line-clamp-1">
+                    <View className="flex-1 mr-2">
+                      <View className="flex-row items-center gap-2">
+                        <Text className="text-emerald-400 font-bold font-mono text-xs">
+                          [{evt.type}]
+                        </Text>
+                        <Text className="text-slate-500 text-[11px]">
+                          from {evt.sourceService}
+                        </Text>
+                      </View>
+                      <Text numberOfLines={1} className="text-slate-400 text-[11px] font-mono mt-1">
                         Payload: {JSON.stringify(evt.payload)}
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                      </Text>
+                    </View>
+                    <Text className="text-[10px] text-slate-500 font-mono">
                       {new Date(evt.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
+                    </Text>
+                  </View>
                 ))
               )}
-            </div>
-          </div>
-        </div>
+            </View>
+          </View>
+        </View>
       )}
 
       {/* SECTION 2: Complete Architecture & Auth */}
       {activeTab === 'architecture' && (
-        <div className="space-y-5 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <Layers className="w-5 h-5 text-emerald-600" />
-              <span>Complete System Architecture</span>
-            </h2>
+        <View className="space-y-5">
+          <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
+            <View className="flex-row items-center gap-2">
+              <Layers size={20} color="#059669" />
+              <Text className="text-xl font-extrabold text-slate-900 dark:text-white">
+                Complete System Architecture & Security Invariants
+              </Text>
+            </View>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                  <Shield className="w-4 h-4 text-emerald-600" />
-                  <span>Security & Anti-Cheating Invariants</span>
-                </h3>
-                <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
-                  <li><strong>Untrusted Mobile Client:</strong> The client never receives <code>isCorrect</code> or answers during the quiz.</li>
-                  <li><strong>Server-Enforced Timing:</strong> <code>startedAt</code> and <code>expiresAt</code> are checked server-side upon submit.</li>
-                  <li><strong>Server-Side Evaluation:</strong> Score, percentage, and metrics are computed solely in backend code.</li>
-                  <li><strong>Idempotency:</strong> Duplicate quiz submissions are prevented with status locking.</li>
-                </ul>
-              </div>
+            <View className="flex-row flex-wrap justify-between pt-2">
+              <View className="w-full sm:w-[48%] bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 mb-3">
+                <View className="flex-row items-center gap-2 mb-2">
+                  <Shield size={16} color="#059669" />
+                  <Text className="font-bold text-sm text-slate-900 dark:text-white">
+                    Anti-Cheating Invariants
+                  </Text>
+                </View>
+                <Text className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  • Mobile Client never receives isCorrect during active quiz.{'\n'}
+                  • Server evaluates scores, times, and submissions authoritatively.{'\n'}
+                  • Idempotent submission locks prevent replay attacks.
+                </Text>
+              </View>
 
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                  <Smartphone className="w-4 h-4 text-emerald-600" />
-                  <span>Offline First & Sync Engine</span>
-                </h3>
-                <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
-                  <li><strong>Local SQLite Cache:</strong> Downloaded quizzes and questions stored in SQLite tables.</li>
-                  <li><strong>Offline Attempts Queue:</strong> User answers cached locally without dropping state.</li>
-                  <li><strong>Batch Sync Endpoint:</strong> <code>POST /api/v1/sync/attempts</code> syncs when connection returns.</li>
-                  <li><strong>Instant Local Selection:</strong> Selected options are written locally immediately.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+              <View className="w-full sm:w-[48%] bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 mb-3">
+                <View className="flex-row items-center gap-2 mb-2">
+                  <Smartphone size={16} color="#059669" />
+                  <Text className="font-bold text-sm text-slate-900 dark:text-white">
+                    Offline First & SQLite Sync
+                  </Text>
+                </View>
+                <Text className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  • Downloaded mock exams cached in local SQLite tables.{'\n'}
+                  • Solved offline attempts queued and synced via batch endpoint.{'\n'}
+                  • Zero latency instant response selection.
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
       )}
 
       {/* SECTION 3: Prisma Schema */}
       {activeTab === 'schema' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <Database className="w-5 h-5 text-emerald-600" />
-                <span>Prisma PostgreSQL Schema (prisma/schema.prisma)</span>
-              </h2>
-              <button
-                onClick={() => copyToClipboard('// See full prisma file in repository /prisma/schema.prisma', 'schema')}
-                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+        <View className="space-y-4">
+          <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <Database size={20} color="#059669" />
+                <Text className="text-xl font-extrabold text-slate-900 dark:text-white">
+                  Prisma PostgreSQL Schema
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => copyToClipboard('// Check prisma/schema.prisma in repository', 'schema')}
+                className="flex-row items-center gap-1"
               >
-                {copiedSection === 'schema' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                <span>{copiedSection === 'schema' ? 'Copied' : 'Copy Schema'}</span>
-              </button>
-            </div>
-            <p className="text-xs text-slate-500">
+                {copiedSection === 'schema' ? <CheckCircle size={14} color="#10b981" /> : <Copy size={14} color="#10b981" />}
+                <Text className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-1">
+                  {copiedSection === 'schema' ? 'Copied' : 'Copy'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text className="text-xs text-slate-500">
               Normalized relational schema with indexes, cascades, UUID primary keys, and relations between Subject, Topic, Question, Option, Quiz, QuizAttempt, and Bookmarks.
-            </p>
+            </Text>
 
-            <div className="bg-slate-950 text-slate-200 font-mono text-xs p-4 rounded-2xl overflow-x-auto max-h-[480px]">
-              <pre>{`model User {
+            <View className="bg-slate-950 p-4 rounded-2xl">
+              <Text className="text-slate-300 font-mono text-[11px] leading-relaxed">
+{`model User {
   id           String        @id @default(uuid())
   email        String        @unique
   name         String
@@ -353,9 +377,6 @@ export const ArchitectureDocs: React.FC = () => {
   avatarUrl    String?
   role         Role          @default(USER)
   refreshToken String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-
   attempts     QuizAttempt[]
   bookmarks    Bookmark[]
   progress     UserProgress?
@@ -365,21 +386,8 @@ model Subject {
   id          String     @id @default(uuid())
   name        String     @unique
   code        String     @unique
-  description String?
-  icon        String?
   color       String     @default("#4F46E5")
   topics      Topic[]
-  questions   Question[]
-  quizzes     Quiz[]
-}
-
-model Topic {
-  id          String     @id @default(uuid())
-  subjectId   String
-  name        String
-  description String?
-  order       Int        @default(0)
-  subject     Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   questions   Question[]
   quizzes     Quiz[]
 }
@@ -387,40 +395,12 @@ model Topic {
 model Question {
   id           String         @id @default(uuid())
   subjectId    String
-  topicId      String?
   questionText String
   explanation  String
   difficulty   Difficulty     @default(MEDIUM)
-  questionType QuestionType   @default(MULTIPLE_CHOICE)
-  subject      Subject        @relation(fields: [subjectId], references: [id], onDelete: Restrict)
-  topic        Topic?         @relation(fields: [topicId], references: [id], onDelete: SetNull)
   options      Option[]
-  quizItems    QuizQuestion[]
   userAnswers  UserAnswer[]
   bookmarks    Bookmark[]
-}
-
-model Option {
-  id           String       @id @default(uuid())
-  questionId   String
-  optionText   String
-  isCorrect    Boolean      @default(false)
-  question     Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  userAnswers  UserAnswer[]
-}
-
-model Quiz {
-  id             String         @id @default(uuid())
-  title          String
-  description    String
-  subjectId      String?
-  topicId        String?
-  duration       Int            // Duration in minutes
-  totalQuestions Int            @default(0)
-  difficulty     Difficulty     @default(MEDIUM)
-  isPublished    Boolean        @default(true)
-  quizQuestions  QuizQuestion[]
-  attempts       QuizAttempt[]
 }
 
 model QuizAttempt {
@@ -429,93 +409,93 @@ model QuizAttempt {
   quizId            String
   startedAt         DateTime      @default(now())
   expiresAt         DateTime
-  completedAt       DateTime?
   status            AttemptStatus @default(IN_PROGRESS)
-  totalQuestions    Int
-  answeredQuestions Int           @default(0)
-  correctAnswers    Int           @default(0)
-  incorrectAnswers  Int           @default(0)
   score             Float         @default(0)
   percentage        Float         @default(0)
-  timeTaken         Int           @default(0) // seconds
-  answers           UserAnswer[]
-}`}</pre>
-            </div>
-          </div>
-        </div>
+  timeTaken         Int           @default(0)
+}`}
+              </Text>
+            </View>
+          </View>
+        </View>
       )}
 
       {/* SECTION 4: REST API Endpoints */}
       {activeTab === 'endpoints' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <Server className="w-5 h-5 text-emerald-600" />
-              <span>All Implemented REST API Endpoints (/api/v1)</span>
-            </h2>
+        <View className="space-y-4">
+          <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
+            <View className="flex-row items-center gap-2">
+              <Server size={20} color="#059669" />
+              <Text className="text-xl font-extrabold text-slate-900 dark:text-white">
+                All REST API Endpoints (/api/v1)
+              </Text>
+            </View>
 
-            <div className="space-y-2.5">
+            <View className="space-y-2">
               {[
-                { method: 'POST', path: '/api/v1/auth/login', svc: 'auth-service (:4001)', desc: 'Authenticates user, returns access & refresh tokens' },
+                { method: 'POST', path: '/api/v1/auth/login', svc: 'auth-service (:4001)', desc: 'Authenticates user, returns JWT tokens' },
                 { method: 'POST', path: '/api/v1/auth/register', svc: 'auth-service (:4001)', desc: 'Registers new student with hashed password' },
-                { method: 'GET', path: '/api/v1/auth/me', svc: 'auth-service (:4001)', desc: 'Returns current authenticated user profile' },
-                { method: 'GET', path: '/api/v1/subjects', svc: 'catalog-service (:4002)', desc: 'Lists all subjects with topic and question counts' },
-                { method: 'GET', path: '/api/v1/subjects/:id/topics', svc: 'catalog-service (:4002)', desc: 'Returns syllabus topics for given subject' },
-                { method: 'GET', path: '/api/v1/quizzes', svc: 'catalog-service (:4002)', desc: 'Lists published quizzes with search, subject & difficulty filters' },
-                { method: 'POST', path: '/api/v1/quizzes/:id/start', svc: 'exam-service (:4003)', desc: 'Creates QuizAttempt, returns questions without isCorrect' },
-                { method: 'POST', path: '/api/v1/quizzes/:id/submit', svc: 'exam-service (:4003)', desc: 'Evaluates answers server-side, emits event to broker' },
-                { method: 'GET', path: '/api/v1/attempts/:id', svc: 'exam-service (:4003)', desc: 'Returns evaluated score and questions review with explanations' },
+                { method: 'GET', path: '/api/v1/subjects', svc: 'catalog-service (:4002)', desc: 'Lists all subjects with topic counts' },
+                { method: 'GET', path: '/api/v1/quizzes', svc: 'catalog-service (:4002)', desc: 'Lists published quizzes with filters' },
+                { method: 'POST', path: '/api/v1/quizzes/:id/start', svc: 'exam-service (:4003)', desc: 'Creates QuizAttempt without answers' },
+                { method: 'POST', path: '/api/v1/quizzes/:id/submit', svc: 'exam-service (:4003)', desc: 'Server-side evaluation & event publish' },
+                { method: 'GET', path: '/api/v1/attempts/:id', svc: 'exam-service (:4003)', desc: 'Returns scored answers & explanations' },
                 { method: 'POST', path: '/api/v1/questions/:id/bookmark', svc: 'bookmarks-service (:4005)', desc: 'Bookmarks question for offline revision' },
-                { method: 'GET', path: '/api/v1/users/me/statistics', svc: 'analytics-service (:4004)', desc: 'Returns subject accuracy, topic breakdown, streak' },
-                { method: 'GET', path: '/api/v1/leaderboard', svc: 'analytics-service (:4004)', desc: 'Ranks users by score and accuracy across daily/weekly/all-time' },
-                { method: 'POST', path: '/api/v1/sync/attempts', svc: 'exam-service (:4003)', desc: 'Synchronizes queued attempts solved while offline' },
+                { method: 'GET', path: '/api/v1/users/me/statistics', svc: 'analytics-service (:4004)', desc: 'Returns subject accuracy breakdown' },
+                { method: 'GET', path: '/api/v1/leaderboard', svc: 'analytics-service (:4004)', desc: 'Ranks users by score and accuracy' },
               ].map((ep, i) => (
-                <div
+                <View
                   key={i}
-                  className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs"
+                  className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex-row items-center justify-between"
                 >
-                  <div className="flex items-center gap-2.5 font-mono">
-                    <span
-                      className={`font-extrabold px-2 py-0.5 rounded-md text-[10px] ${
-                        ep.method === 'POST'
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
-                          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                  <View className="flex-row items-center gap-2">
+                    <View
+                      className={`px-2 py-0.5 rounded-md ${
+                        ep.method === 'POST' ? 'bg-blue-100 dark:bg-blue-950/60' : 'bg-emerald-100 dark:bg-emerald-950/60'
                       }`}
                     >
-                      {ep.method}
-                    </span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{ep.path}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-mono hidden md:inline">
-                      {ep.svc}
-                    </span>
-                  </div>
-                  <span className="text-slate-500 hidden sm:inline">{ep.desc}</span>
-                </div>
+                      <Text
+                        className={`text-[10px] font-extrabold font-mono ${
+                          ep.method === 'POST' ? 'text-blue-700 dark:text-blue-300' : 'text-emerald-700 dark:text-emerald-300'
+                        }`}
+                      >
+                        {ep.method}
+                      </Text>
+                    </View>
+                    <Text className="font-mono font-bold text-xs text-slate-800 dark:text-slate-200">
+                      {ep.path}
+                    </Text>
+                  </View>
+                  <Text className="text-[11px] text-slate-500">
+                    {ep.desc}
+                  </Text>
+                </View>
               ))}
-            </div>
-          </div>
-        </div>
+            </View>
+          </View>
+        </View>
       )}
 
-      {/* SECTION 5: Docker Compose & Microservices Layout */}
+      {/* SECTION 5: Docker Compose */}
       {activeTab === 'codebase' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
-              <Terminal className="w-5 h-5 text-emerald-600" />
-              <span>Production docker-compose.yml</span>
-            </h3>
-            <p className="text-xs text-slate-500">
-              Orchestrates the Edge Gateway, 5 Microservices, Redis Message Broker, and PostgreSQL cluster in an isolated bridge network.
-            </p>
+        <View className="space-y-4">
+          <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
+            <View className="flex-row items-center gap-2">
+              <Terminal size={20} color="#059669" />
+              <Text className="font-extrabold text-slate-900 dark:text-white text-base">
+                Production docker-compose.yml
+              </Text>
+            </View>
+            <Text className="text-xs text-slate-500">
+              Orchestrates Edge Gateway, 5 Microservices, Redis Message Broker, and PostgreSQL cluster in an isolated bridge network.
+            </Text>
 
-            <pre className="bg-slate-950 text-slate-300 font-mono text-xs p-4 rounded-xl overflow-x-auto leading-relaxed max-h-[380px]">
+            <View className="bg-slate-950 p-4 rounded-xl">
+              <Text className="text-slate-300 font-mono text-[11px] leading-relaxed">
 {`version: '3.8'
 
 services:
-  # 1. Edge API Gateway / Ingress Router
   api-gateway:
-    build: .
     ports: ["3000:3000"]
     environment:
       - AUTH_SERVICE_URL=http://auth-service:4001
@@ -525,39 +505,18 @@ services:
       - BOOKMARKS_SERVICE_URL=http://bookmarks-service:4005
       - REDIS_URL=redis://message-broker:6379
 
-  # 2. Identity & Authentication Microservice (:4001)
-  auth-service:
-    ports: ["4001:4001"]
-    environment:
-      - DATABASE_URL=postgresql://quiz_user:quiz_secret@postgres-db:5432/quizpulse_auth
-
-  # 3. Content & Catalog Microservice (:4002)
-  catalog-service:
-    ports: ["4002:4002"]
-
-  # 4. Exam & Scoring Engine Microservice (:4003)
-  exam-service:
-    ports: ["4003:4003"]
-
-  # 5. Analytics & Leaderboard Microservice (:4004)
-  analytics-service:
-    ports: ["4004:4004"]
-
-  # 6. Bookmarks Microservice (:4005)
-  bookmarks-service:
-    ports: ["4005:4005"]
-
-  # 7. Redis Message Broker (:6379)
-  message-broker:
-    image: redis:7-alpine
-
-  # 8. PostgreSQL Database (:5432)
-  postgres-db:
-    image: postgres:16-alpine`}
-            </pre>
-          </div>
-        </div>
+  auth-service:      # Port 4001: JWT, Passwords, Identity
+  catalog-service:   # Port 4002: Subjects, Questions, Taxonomies
+  exam-service:      # Port 4003: Timing, Anti-Cheat, Grading
+  analytics-service: # Port 4004: Streaks, Leaderboards
+  bookmarks-service: # Port 4005: Saved Collections
+  message-broker:    # Port 6379: Redis Pub/Sub Topic
+  postgres-db:       # Port 5432: PostgreSQL Cluster`}
+              </Text>
+            </View>
+          </View>
+        </View>
       )}
-    </div>
+    </ScrollView>
   );
 };

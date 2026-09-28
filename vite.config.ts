@@ -10,7 +10,7 @@ export default defineConfig(() => {
       alias: {
         '@': path.resolve(__dirname, '.'),
         'react-native': path.resolve(__dirname, 'src/react-native-shim.tsx'),
-        'lucide-react-native': path.resolve(__dirname, 'src/lucide-react-native-shim.tsx'),
+        'react-native-svg': path.resolve(__dirname, 'src/react-native-svg-shim.tsx'),
       },
     },
     server: {

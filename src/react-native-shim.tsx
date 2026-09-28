@@ -1,5 +1,4 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 
 export const View = React.forwardRef<HTMLDivElement, any>(
   ({ className = '', style, children, ...props }, ref) => (
@@ -129,9 +128,24 @@ export const SafeAreaView = React.forwardRef<HTMLDivElement, any>(
 );
 SafeAreaView.displayName = 'SafeAreaView';
 
-export const ActivityIndicator: React.FC<any> = ({ size, color = '#059669', className = '' }) => (
-  <Loader2 size={size === 'large' ? 32 : 18} color={color} className={`animate-spin ${className}`} />
-);
+export const ActivityIndicator: React.FC<any> = ({ size = 20, color = '#059669', className = '' }) => {
+  const dimension = size === 'large' ? 32 : typeof size === 'number' ? size : 20;
+  return (
+    <svg
+      width={dimension}
+      height={dimension}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`animate-spin ${className}`}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+};
 
 export const StatusBar: React.FC<any> = () => null;
 
