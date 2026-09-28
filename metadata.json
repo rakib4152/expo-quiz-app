@@ -1,0 +1,6 @@
+{
+  "name": "QuizPulse - Mobile Quiz Platform",
+  "description": "Production-ready mobile quiz platform built with React Native Expo client and Next.js / Express TypeScript Prisma PostgreSQL REST backend.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
