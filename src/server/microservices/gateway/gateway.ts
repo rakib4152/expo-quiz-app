@@ -13,23 +13,16 @@ export const apiGateway = Router();
 
 // Gateway Routing Table
 apiGateway.use('/auth', authMicroservice);
-apiGateway.use('/subjects', catalogMicroservice);
-apiGateway.use('/topics', catalogMicroservice);
 
-// Quizzes routing:
-// Exam actions (/start, /submit) route to examMicroservice first;
-// Public queries (/quizzes, /quizzes/:id) fall through to catalogMicroservice
-apiGateway.use('/quizzes', examMicroservice);
-apiGateway.use('/quizzes', catalogMicroservice);
-
-apiGateway.use('/attempts', examMicroservice);
-apiGateway.use('/sync', examMicroservice);
-
-apiGateway.use('/users', analyticsMicroservice);
-apiGateway.use('/leaderboard', analyticsMicroservice);
-
-apiGateway.use('/bookmarks', bookmarksMicroservice);
-apiGateway.use('/questions', bookmarksMicroservice);
+// Mount downstream microservices directly at gateway root:
+// catalogMicroservice handles /subjects, /topics, /quizzes
+// examMicroservice handles /quizzes/:id/start, /quizzes/:id/submit, /attempts, /sync
+// analyticsMicroservice handles /users/me/*, /leaderboard
+// bookmarksMicroservice handles /bookmarks, /questions/:id/bookmark
+apiGateway.use(examMicroservice);
+apiGateway.use(catalogMicroservice);
+apiGateway.use(analyticsMicroservice);
+apiGateway.use(bookmarksMicroservice);
 
 // --- Microservices Telemetry & Observability Endpoints ---
 

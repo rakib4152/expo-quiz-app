@@ -81,7 +81,10 @@ export const QuizCard: React.FC<QuizCardProps> = ({ quiz, onPress, onDownloaded 
 
         {/* Offline Download button */}
         <TouchableOpacity
-          onPress={handleDownload}
+          onPress={(e: any) => {
+            if (e?.stopPropagation) e.stopPropagation();
+            handleDownload();
+          }}
           disabled={isDownloading || isDownloaded}
           className={`p-1.5 rounded-xl ${
             isDownloaded

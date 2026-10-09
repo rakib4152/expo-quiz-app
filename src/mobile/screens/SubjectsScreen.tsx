@@ -27,7 +27,7 @@ export const SubjectsScreen: React.FC<SubjectsScreenProps> = ({
 
   const loadSubjects = async () => {
     try {
-      const res = await api.get<Subject[]>('/subjects');
+      const res = await api.get<Subject[]>('/subjects', { requiresAuth: false });
       if (res.data) {
         setSubjects(res.data);
         if (selectedSubjectId) {
@@ -44,8 +44,8 @@ export const SubjectsScreen: React.FC<SubjectsScreenProps> = ({
     setActiveSubject(sub);
     try {
       const [topicsRes, quizzesRes] = await Promise.all([
-        api.get<Topic[]>(`/subjects/${sub.id}/topics`),
-        api.get<Quiz[]>(`/quizzes?subjectId=${sub.id}`),
+        api.get<Topic[]>(`/subjects/${sub.id}/topics`, { requiresAuth: false }),
+        api.get<Quiz[]>(`/quizzes?subjectId=${sub.id}`, { requiresAuth: false }),
       ]);
       if (topicsRes.data) setTopics(topicsRes.data);
       if (quizzesRes.data) setSubjectQuizzes(quizzesRes.data);

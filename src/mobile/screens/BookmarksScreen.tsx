@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Bookmark, Trash2, CheckCircle2 } from 'lucide-react-native';
 import { api } from '../services/api/client.ts';
+import { useAuth } from '../store/authStore.ts';
 import type { BookmarkItem, Option } from '../../types/quiz.ts';
 
 export const BookmarksScreen: React.FC = () => {
+  const { user } = useAuth();
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,8 +17,10 @@ export const BookmarksScreen: React.FC = () => {
       if (res.data) {
         setBookmarks(res.data);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      if (e?.status !== 401) {
+        console.error('Bookmarks error:', e);
+      }
     } finally {
       setLoading(false);
     }
@@ -24,7 +28,7 @@ export const BookmarksScreen: React.FC = () => {
 
   useEffect(() => {
     fetchBookmarks();
-  }, []);
+  }, [user]);
 
   const handleRemove = async (questionId: string) => {
     setBookmarks((prev) => prev.filter((b) => b.questionId !== questionId));

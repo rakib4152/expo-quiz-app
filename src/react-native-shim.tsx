@@ -1,8 +1,24 @@
 import React from 'react';
 
+function cleanDomProps(props: Record<string, any>) {
+  const {
+    testID,
+    activeOpacity,
+    numberOfLines,
+    showsVerticalScrollIndicator,
+    showsHorizontalScrollIndicator,
+    resizeMode,
+    ...rest
+  } = props;
+  if (testID) {
+    (rest as any)['data-testid'] = testID;
+  }
+  return rest;
+}
+
 export const View = React.forwardRef<HTMLDivElement, any>(
   ({ className = '', style, children, ...props }, ref) => (
-    <div ref={ref} className={className} style={style} {...props}>
+    <div ref={ref} className={className} style={style} {...cleanDomProps(props)}>
       {children}
     </div>
   )
@@ -16,7 +32,7 @@ export const Text = React.forwardRef<HTMLSpanElement, any>(
     else if (numberOfLines && numberOfLines > 1) lineClampClass = `line-clamp-${numberOfLines}`;
 
     return (
-      <span ref={ref} className={`${className} ${lineClampClass}`} style={style} {...props}>
+      <span ref={ref} className={`${className} ${lineClampClass}`} style={style} {...cleanDomProps(props)}>
         {children}
       </span>
     );
@@ -48,42 +64,58 @@ export const TextInput = React.forwardRef<HTMLInputElement, any>(
       placeholder={placeholder}
       className={`outline-none bg-transparent ${className}`}
       style={style}
-      {...props}
+      {...cleanDomProps(props)}
     />
   )
 );
 TextInput.displayName = 'TextInput';
 
-export const TouchableOpacity = React.forwardRef<HTMLButtonElement, any>(
+export const TouchableOpacity = React.forwardRef<HTMLDivElement, any>(
   ({ className = '', style, onPress, disabled, children, activeOpacity, ...props }, ref) => (
-    <button
+    <div
       ref={ref}
-      type="button"
-      onClick={onPress}
-      disabled={disabled}
-      className={`cursor-pointer active:opacity-75 transition-opacity disabled:opacity-50 disabled:pointer-events-none select-none text-left ${className}`}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      onClick={(e) => {
+        if (!disabled && onPress) onPress(e);
+      }}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled && onPress) {
+          e.preventDefault();
+          onPress(e);
+        }
+      }}
+      className={`cursor-pointer active:opacity-75 transition-opacity select-none text-left ${disabled ? 'opacity-50 pointer-events-none' : ''} ${className}`}
       style={style}
-      {...props}
+      {...cleanDomProps(props)}
     >
       {children}
-    </button>
+    </div>
   )
 );
 TouchableOpacity.displayName = 'TouchableOpacity';
 
-export const Pressable = React.forwardRef<HTMLButtonElement, any>(
+export const Pressable = React.forwardRef<HTMLDivElement, any>(
   ({ className = '', style, onPress, disabled, children, ...props }, ref) => (
-    <button
+    <div
       ref={ref}
-      type="button"
-      onClick={onPress}
-      disabled={disabled}
-      className={`cursor-pointer active:scale-[0.98] transition-transform disabled:opacity-50 disabled:pointer-events-none select-none text-left ${className}`}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      onClick={(e) => {
+        if (!disabled && onPress) onPress(e);
+      }}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled && onPress) {
+          e.preventDefault();
+          onPress(e);
+        }
+      }}
+      className={`cursor-pointer active:scale-[0.98] transition-transform select-none text-left ${disabled ? 'opacity-50 pointer-events-none' : ''} ${className}`}
       style={style}
-      {...props}
+      {...cleanDomProps(props)}
     >
       {children}
-    </button>
+    </div>
   )
 );
 Pressable.displayName = 'Pressable';
@@ -98,7 +130,7 @@ export const Image = React.forwardRef<HTMLImageElement, any>(
         alt={alt}
         className={`object-${resizeMode} ${className}`}
         style={style}
-        {...props}
+        {...cleanDomProps(props)}
       />
     );
   }
@@ -111,7 +143,7 @@ export const ScrollView = React.forwardRef<HTMLDivElement, any>(
       ref={ref}
       className={`${horizontal ? 'overflow-x-auto flex-row' : 'overflow-y-auto flex-col'} ${className}`}
       style={style}
-      {...props}
+      {...cleanDomProps(props)}
     >
       {children}
     </div>
@@ -121,7 +153,7 @@ ScrollView.displayName = 'ScrollView';
 
 export const SafeAreaView = React.forwardRef<HTMLDivElement, any>(
   ({ className = '', style, children, ...props }, ref) => (
-    <div ref={ref} className={`flex-1 ${className}`} style={style} {...props}>
+    <div ref={ref} className={`flex-1 ${className}`} style={style} {...cleanDomProps(props)}>
       {children}
     </div>
   )

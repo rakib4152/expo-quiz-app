@@ -127,7 +127,17 @@ class ApiClient {
         }
       }
 
-      const data: ApiResponse<T> = await response.json();
+      const text = await response.text();
+      let data: ApiResponse<T>;
+      try {
+        data = text ? JSON.parse(text) : { success: response.ok } as ApiResponse<T>;
+      } catch {
+        throw new ApiError(
+          response.ok ? 'Invalid response format from server.' : `Server returned error (${response.status})`,
+          'PARSE_ERROR',
+          response.status
+        );
+      }
 
       if (!response.ok || !data.success) {
         const errorInfo = data.error || { code: 'HTTP_ERROR', message: response.statusText || 'An unexpected error occurred' };

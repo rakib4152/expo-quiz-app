@@ -19,7 +19,7 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
 
   const fetchFilters = async () => {
     try {
-      const res = await api.get<Subject[]>('/subjects');
+      const res = await api.get<Subject[]>('/subjects', { requiresAuth: false });
       if (res.data) setSubjects(res.data);
     } catch (e) {
       console.error(e);
@@ -34,7 +34,7 @@ export const QuizzesScreen: React.FC<QuizzesScreenProps> = ({ onNavigateToQuiz }
       if (selectedDifficulty !== 'all') params.append('difficulty', selectedDifficulty);
       if (sortBy) params.append('sort', sortBy);
 
-      const res = await api.get<Quiz[]>(`/quizzes?${params.toString()}`);
+      const res = await api.get<Quiz[]>(`/quizzes?${params.toString()}`, { requiresAuth: false });
       if (res.data) {
         setQuizzes(res.data);
       }

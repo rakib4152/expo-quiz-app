@@ -40,17 +40,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const loadData = async () => {
     try {
-      const [quizRes, subRes, progRes, leadRes] = await Promise.all([
-        api.get<Quiz[]>('/quizzes?limit=4'),
-        api.get<Subject[]>('/subjects'),
-        api.get<UserProgressData>('/users/me/progress'),
-        api.get<{ leaderboard: LeaderboardEntry[] }>('/leaderboard'),
+      const [quizRes, subRes, leadRes] = await Promise.all([
+        api.get<Quiz[]>('/quizzes?limit=4', { requiresAuth: false }),
+        api.get<Subject[]>('/subjects', { requiresAuth: false }),
+        api.get<{ leaderboard: LeaderboardEntry[] }>('/leaderboard', { requiresAuth: false }),
       ]);
 
       if (quizRes.data) setQuizzes(quizRes.data);
       if (subRes.data) setSubjects(subRes.data);
-      if (progRes.data) setProgress(progRes.data);
       if (leadRes.data?.leaderboard?.length) setTopLeader(leadRes.data.leaderboard[0]);
+
+      try {
+        const progRes = await api.get<UserProgressData>('/users/me/progress');
+        if (progRes.data) setProgress(progRes.data);
+      } catch {
+        // Optional for guest/unauthenticated users
+      }
     } catch (e) {
       console.error('Home load error:', e);
     }
